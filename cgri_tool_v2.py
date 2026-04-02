@@ -731,9 +731,12 @@ elif page == "🧮 Custom Calculator":
                     comp_card("Financial Exposure", f"{result['financial_exposure']}/10",
                               f"Net D/EBITDA {net_debt_ebitda:.2f}")
                 with r3b:
-                    comp_card("Multipliers",
-                              f"×{result['sector_multiplier']:.2f} · ×{result['volatility_multiplier']:.3f}",
-                              sector)
+                    comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                r4a, r4b = st.columns(2)
+                with r4a:
+                    comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
+                              "2024 VIX avg (CBOE / FRED)")
 
             st.markdown("---")
 
