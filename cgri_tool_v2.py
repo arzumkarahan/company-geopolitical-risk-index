@@ -508,6 +508,24 @@ with st.sidebar:
 
     st.divider()
 
+    st.markdown("<div class='section-hdr' style='color:#6b728a'>Group members</div>", unsafe_allow_html=True)
+    members = [
+        "Calogero Emanuele Ferrante",
+        "Arzum Karahan",
+        "Andrea Lorusso",
+        "Angela Lorusso",
+        "Van Anh Nguyen",
+        "Valerio Parigi",
+        "Domenico Soprano",
+        "Pietro Zini",
+    ]
+    st.markdown(
+        "".join(f"<div style='font-size:0.75rem;color:#8a94a6;padding:2px 0'>{m}</div>" for m in members),
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+
     # ── Calculator inputs live in sidebar ──────────────────────────────────
     if page == "🧮 Custom Calculator":
         st.markdown("### Company profile")
