@@ -281,7 +281,11 @@ def load_all():
     bench_df = pd.DataFrame(bench)
     sec_co_map = dict(zip(sector_df["company"], sector_df["sector"]))
     bench_df["Sector"] = bench_df["Company"].map(sec_co_map).fillna("Unknown")
-    bench_df["Risk Category"] = bench_df["Final CGRI"].apply(lambda s: risk_label(s)[0])
+    bench_df["Risk Category"] = pd.Categorical(
+        bench_df["Final CGRI"].apply(lambda s: risk_label(s)[0]),
+        categories=["Low", "Moderate", "High", "Very High"],
+        ordered=True,
+    )
     bench_df = bench_df.sort_values("Final CGRI", ascending=False).reset_index(drop=True)
 
     ws4 = _ws(DATA_DIR / "Template CGRI.xlsx", "Volatility Risk Multiplier")
