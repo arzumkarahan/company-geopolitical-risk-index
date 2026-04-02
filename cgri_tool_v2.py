@@ -931,10 +931,10 @@ $$
 
 | Component | Formula |
 |---|---|
-| **HQ Risk** | Country GRI of headquarters |
-| **Revenue Exposure** | $\Sigma(\text{GRI}_c \times \text{rev\_std}_c) \times \text{HHI\_sub}$ |
-| **Supply Chain** | $(0.5 \times C_{\sup} + 0.5 \times C_{\text{fac}}) \times \text{HHI\_sub}$ |
-| **Facility Risk** | $\Sigma(\text{GRI}_c \times \text{fac\_std}_c)$ — no HHI |
+| **HQ Risk** | Country GRI of the headquarters location |
+| **Revenue Exposure** | Σ(GRI_c × rev_share_c) × HHI_sub |
+| **Supply Chain** | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
+| **Facility Risk** | Σ(GRI_c × fac_share_c) — no HHI adjustment |
 | **Financial Exposure** | Discrete score 2–10 from Net Debt / EBITDA |
 """)
 
