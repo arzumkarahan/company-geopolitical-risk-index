@@ -310,7 +310,6 @@ RISK_COLORS = {
     "Very High": "#e74c3c",
 }
 COMPONENT_KEYS = ["HQ Risk", "Revenue Exposure", "Supply Chain", "Facility Risk", "Financial Exposure"]
-PALETTE = ["#4b6fff", "#f05545", "#00c897", "#ff9d00", "#a259ff", "#00b4d8"]
 
 
 def risk_label(score: float) -> tuple[str, str]:
@@ -731,6 +730,13 @@ elif page == "🧮 Custom Calculator":
 
     # ── Results ──────────────────────────────────────────────────────────────
     if run_calc:
+        missing = []
+        if not rev_input:    missing.append("Revenue by country")
+        if not sup_input:    missing.append("Supplier distribution")
+        if not supfac_input: missing.append("Supplier facility distribution")
+        if missing:
+            st.warning(f"⚠ Please fill in: **{', '.join(missing)}** before computing.")
+            st.stop()
         try:
             result = compute_cgri(
                 hq_country=hq_country, sector=sector,
@@ -779,10 +785,8 @@ elif page == "🧮 Custom Calculator":
                 with r3b:
                     comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
                 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-                r4a, r4b = st.columns(2)
-                with r4a:
-                    comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
-                              "2024 VIX avg (CBOE / FRED)")
+                comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
+                          "2024 VIX avg (CBOE / FRED)")
 
             st.markdown("---")
 
