@@ -965,7 +965,7 @@ $$
 - **Country GRI scores** — 147 countries ([geopriskindex.com](https://www.geopriskindex.com))
 - **Sector multipliers** — S&P Global Industry Risk Assessment
 - **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348**
-- **Benchmark scores** — 25 global companies (internal CGRI Excel template)
+- **Benchmark scores** — 25 global companies (data collected from Bloomberg)
 - **Supply chain note** — The SC intermediate formula follows the Excel implementation:
   `0.5 × C_sup × 0.5 × C_fac` (product, not sum), replicating the exact benchmark values.
 """)
