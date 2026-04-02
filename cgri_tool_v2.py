@@ -494,23 +494,27 @@ sector_options  = sorted(sector_df["sector"].unique())
 
 with st.sidebar:
     st.markdown("""
-<div style="display:flex;align-items:center;gap:12px;padding:10px 0 18px 0">
-  <!-- Globe SVG -->
-  <svg width="54" height="54" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="48" fill="#f07920"/>
-    <!-- swirl lines -->
-    <path d="M18 30 Q35 10 55 28 Q70 44 60 65 Q50 82 30 78 Q10 72 18 50 Q22 38 18 30Z"
-          fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
-    <path d="M38 15 Q55 8 68 22 Q80 38 74 58 Q68 75 52 80"
-          fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
-    <path d="M10 52 Q20 68 38 72 Q56 76 65 65"
-          fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+<div style="display:flex;align-items:center;gap:14px;padding:12px 0 20px 0">
+  <svg width="58" height="58" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="gc">
+        <circle cx="50" cy="50" r="47"/>
+      </clipPath>
+    </defs>
+    <circle cx="50" cy="50" r="49" fill="#f07920"/>
+    <g clip-path="url(#gc)">
+      <!-- equator -->
+      <ellipse cx="50" cy="50" rx="47" ry="17" fill="none" stroke="white" stroke-width="7"/>
+      <!-- vertical longitude -->
+      <ellipse cx="50" cy="50" rx="22" ry="47" fill="none" stroke="white" stroke-width="7"/>
+      <!-- top arc -->
+      <ellipse cx="50" cy="50" rx="47" ry="33" fill="none" stroke="white" stroke-width="4" stroke-dasharray="60 200"/>
+    </g>
   </svg>
-  <!-- Text -->
-  <div>
-    <div style="font-size:0.82rem;color:#d0d4e8;font-family:serif;line-height:1.2">Company Geopolitical</div>
-    <div style="font-size:0.95rem;font-weight:700;color:#f07920;font-family:serif;line-height:1.2">Risk Index</div>
-    <div style="font-size:0.62rem;color:#6b728a;margin-top:3px">2024 Edition</div>
+  <div style="line-height:1.25">
+    <div style="font-size:0.88rem;color:#c8cce0;font-weight:400;letter-spacing:0.01em">Company Geopolitical</div>
+    <div style="font-size:1.05rem;font-weight:800;color:#f07920;letter-spacing:0.01em">Risk Index</div>
+    <div style="font-size:0.63rem;color:#555d7a;margin-top:2px;letter-spacing:0.05em;text-transform:uppercase">2024 Edition</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
