@@ -494,7 +494,7 @@ sector_options  = sorted(sector_df["sector"].unique())
 
 with st.sidebar:
     st.markdown("## 🌐 CGRI Tool")
-    st.markdown("<div style='font-size:0.78rem;color:#6b728a;margin-bottom:18px'>Corporate Geopolitical Risk Index · 2024 Edition</div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size:0.78rem;color:#6b728a;margin-bottom:18px'>Company Geopolitical Risk Index · 2024 Edition</div>", unsafe_allow_html=True)
 
     page = st.radio(
         "Navigate",
