@@ -280,6 +280,8 @@ def load_all():
             continue
     bench_df = pd.DataFrame(bench)
     sec_co_map = dict(zip(sector_df["company"], sector_df["sector"]))
+    # Name aliases: Template CGRI uses "Total Energies", other sheets use "Totale Energies"
+    sec_co_map["Total Energies"] = sec_co_map.get("Totale Energies", "Oil and gas exploration and production")
     bench_df["Sector"] = bench_df["Company"].map(sec_co_map).fillna("Unknown")
     bench_df["Risk Category"] = pd.Categorical(
         bench_df["Final CGRI"].apply(lambda s: risk_label(s)[0]),
