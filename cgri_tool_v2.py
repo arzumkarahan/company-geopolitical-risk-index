@@ -493,28 +493,8 @@ sector_options  = sorted(sector_df["sector"].unique())
 # ═══════════════════════════════════════════════════════════════════════════
 
 with st.sidebar:
-    st.markdown("""
-<div style="display:flex;align-items:center;gap:14px;padding:12px 0 20px 0">
-  <svg width="58" height="58" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <clipPath id="gc">
-        <circle cx="50" cy="50" r="47"/>
-      </clipPath>
-    </defs>
-    <circle cx="50" cy="50" r="49" fill="#f07920"/>
-    <g clip-path="url(#gc)">
-      <ellipse cx="50" cy="50" rx="47" ry="17" fill="none" stroke="white" stroke-width="7"/>
-      <ellipse cx="50" cy="50" rx="22" ry="47" fill="none" stroke="white" stroke-width="7"/>
-      <ellipse cx="50" cy="50" rx="47" ry="33" fill="none" stroke="white" stroke-width="4" stroke-dasharray="60 200"/>
-    </g>
-  </svg>
-  <div style="line-height:1.25">
-    <div style="font-size:0.88rem;color:#c8cce0;font-weight:400;letter-spacing:0.01em">Company Geopolitical</div>
-    <div style="font-size:1.05rem;font-weight:800;color:#f07920;letter-spacing:0.01em">Risk Index</div>
-    <div style="font-size:0.63rem;color:#555d7a;margin-top:2px;letter-spacing:0.05em;text-transform:uppercase">2024 Edition</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("## 🌐 CGRI Tool")
+    st.markdown("<div style='font-size:0.78rem;color:#6b728a;margin-bottom:18px'>Corporate Geopolitical Risk Index · 2024 Edition</div>", unsafe_allow_html=True)
 
     page = st.radio(
         "Navigate",
