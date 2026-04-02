@@ -1,0 +1,26 @@
+Company,HQ,Sector,Net D/EBITDA,CGRI (computed),CGRI (Excel),Delta,HQ Risk,Revenue Exp,Supply Chain,Facility Risk,Financial Exp
+Reliance Industries,India,Oil and gas exploration and production,0.87,5.7807,5.7793,0.0014,5.07,7.3676,5.8345,5.07,4
+TSMC,Taiwan,Technology hardware and semiconductors,-0.69,4.5162,4.4946,0.0216,4.26,6.2526,3.8775,4.1356,3
+NVIDIA,United States,Technology hardware and semiconductors,-0.39,4.3608,4.3597,0.0011,4.19,5.2624,4.1465,4.4,3
+Amazon,United States,Retail and restaurants,0.35,4.301,4.3009,0.0001,4.19,6.0443,4.2232,4.0365,4
+Ford,United States,Auto and commercial vehicle manufacturing,-0.58,4.1877,4.1878,-0.0001,4.19,5.0978,3.7341,4.2394,3
+BNP Paribas,France,Financial services finance companies,5.1,4.184,4.1837,0.0003,3.65,3.3573,3.5278,0.0,9
+Tencent,China,Technology software and services,0.06,4.0982,4.0968,0.0014,4.26,6.39,5.3897,0.0,4
+Microsoft,United States,Technology software and services,0.16,4.0854,4.0846,0.0008,4.19,5.2134,4.1233,4.05,4
+Apple,United States,Technology hardware and semiconductors,-0.35,3.9975,3.9962,0.0013,4.19,4.106,3.98,4.2494,3
+ASML,Netherlands,Technology hardware and semiconductors,-0.72,3.9172,3.9163,0.0009,3.59,4.4152,3.87,3.9969,3
+Total Energies,France,Oil and gas exploration and production,0.44,3.8692,3.8689,0.0003,3.65,3.4752,3.6572,4.2138,4
+LVMH,France,Consumer durables,1.02,3.7323,3.732,0.0003,3.65,4.0625,3.4588,3.7646,5
+JP Morgan,United States,Financial services finance companies,-0.57,3.6478,3.648,-0.0002,4.19,5.0405,4.2351,0.0,3
+Volkswagen,Germany,Auto and commercial vehicle manufacturing,-1.0,3.6441,3.643,0.0011,3.42,3.4285,3.7821,4.1877,3
+Samsung,South Korea,Technology hardware and semiconductors,-1.24,3.6221,3.6217,0.0003,3.57,4.0318,3.9049,4.0176,2
+Eli Lilly,United States,Pharmaceuticals,2.15,3.6122,3.6121,0.0001,4.19,4.1008,4.3885,3.9675,6
+ENI,Italy,Oil and gas exploration and production,1.69,3.5715,3.5711,0.0004,3.84,3.9382,3.6504,0.0,5
+Procter & Gamble,United States,Consumer staples and branded nondurables,1.1,3.5649,3.5647,0.0002,4.19,4.5837,4.261,4.3111,5
+Sony,Japan,Consumer durables,0.76,3.5589,3.5574,0.0014,3.38,3.9335,3.8906,3.6262,4
+Toyota,Japan,Auto and commercial vehicle manufacturing,-1.17,3.5118,3.5115,0.0003,3.38,4.0141,3.613,4.0088,2
+Meta,United States,Technology software and services,-0.32,3.4151,3.4146,0.0005,4.19,4.0758,3.6309,3.32,3
+Allianz,Germany,Insurance (Financial services),1.45,3.3686,3.3684,0.0002,3.42,3.3955,3.656,0.0,5
+Novo Nordisk,Denmark,Pharmaceuticals,0.52,3.1878,3.1878,0.0,3.2,5.1713,3.4176,3.8972,4
+L'Oreal,France,Consumer staples and branded nondurables,0.44,3.0731,3.0728,0.0003,3.65,4.0256,3.5877,4.1109,4
+SAP,United States,Technology software and services,-0.02,3.0704,3.0702,0.0002,4.19,4.367,3.8569,0.0,3
