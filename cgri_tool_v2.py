@@ -493,8 +493,27 @@ sector_options  = sorted(sector_df["sector"].unique())
 # ═══════════════════════════════════════════════════════════════════════════
 
 with st.sidebar:
-    st.markdown("## 🌐 CGRI Tool")
-    st.markdown("<div style='font-size:0.78rem;color:#6b728a;margin-bottom:18px'>Corporate Geopolitical Risk Index · 2024 Edition</div>", unsafe_allow_html=True)
+    st.markdown("""
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0 18px 0">
+  <!-- Globe SVG -->
+  <svg width="54" height="54" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="48" fill="#f07920"/>
+    <!-- swirl lines -->
+    <path d="M18 30 Q35 10 55 28 Q70 44 60 65 Q50 82 30 78 Q10 72 18 50 Q22 38 18 30Z"
+          fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+    <path d="M38 15 Q55 8 68 22 Q80 38 74 58 Q68 75 52 80"
+          fill="none" stroke="white" stroke-width="7" stroke-linecap="round"/>
+    <path d="M10 52 Q20 68 38 72 Q56 76 65 65"
+          fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+  <!-- Text -->
+  <div>
+    <div style="font-size:0.82rem;color:#d0d4e8;font-family:serif;line-height:1.2">Company Geopolitical</div>
+    <div style="font-size:0.95rem;font-weight:700;color:#f07920;font-family:serif;line-height:1.2">Risk Index</div>
+    <div style="font-size:0.62rem;color:#6b728a;margin-top:3px">2024 Edition</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     page = st.radio(
         "Navigate",
