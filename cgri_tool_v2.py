@@ -600,13 +600,14 @@ if page == "📊 Benchmark Dashboard":
         fig_stack.update_layout(
             plot_bgcolor="#f7f8fc",
             paper_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(showgrid=False, tickangle=-90,
-                       tickfont=dict(size=11), automargin=True),
+            xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11),
+                       automargin=True, title=None),
             yaxis=dict(gridcolor="#e4e7f0", title="Weighted Score"),
             bargap=0.35,
-            margin=dict(t=20, b=160),
-            legend=dict(orientation="h", yanchor="top", y=-0.28, xanchor="center", x=0.5,
-                        font=dict(size=12)),
+            margin=dict(t=20, b=20, r=160),
+            legend=dict(orientation="v", yanchor="middle", y=0.5,
+                        xanchor="left", x=1.02,
+                        title=None, font=dict(size=12)),
         )
         st.plotly_chart(fig_stack, use_container_width=True)
 
