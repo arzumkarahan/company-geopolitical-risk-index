@@ -340,29 +340,48 @@ def comp_card(label: str, value: str, detail: str = ""):
 
 def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
     dims = ["HQ Risk", "Revenue Exposure", "Supply Chain", "Facility Risk", "Financial Exposure"]
-    fig  = go.Figure()
+    # 25-colour palette — Alphabet (26) covers all benchmark companies
+    pal  = px.colors.qualitative.Alphabet
+    n    = len(rows)
+    many = n > 6   # switch to lines-only when crowded
+
+    fig = go.Figure()
     for i, row in enumerate(rows):
         vals = [row[d] for d in dims]
+        col  = pal[i % len(pal)]
         fig.add_trace(go.Scatterpolar(
             r=vals + [vals[0]], theta=dims + [dims[0]],
-            fill="toself", name=row.get("Company", f"#{i+1}"),
-            line_color=PALETTE[i % len(PALETTE)],
-            fillcolor=PALETTE[i % len(PALETTE)],
-            opacity=0.25 if len(rows) > 1 else 0.35,
-            line=dict(width=2.5),
+            fill="toself" if not many else "none",
+            name=row.get("Company", f"#{i+1}"),
+            line=dict(color=col, width=2 if many else 2.5),
+            fillcolor=col,
+            opacity=0.15 if not many else 1.0,
         ))
+
+    # Legend: right-side vertical for many companies, horizontal below for few
+    if many:
+        legend_cfg = dict(orientation="v", yanchor="top", y=1.0,
+                          xanchor="left", x=1.02, font=dict(size=11))
+        r_margin = 160
+    else:
+        legend_cfg = dict(orientation="h", yanchor="bottom", y=-0.22,
+                          xanchor="center", x=0.5, font=dict(size=12))
+        r_margin = 30
+
     fig.update_layout(
         polar=dict(
             bgcolor="#f7f8fc",
-            radialaxis=dict(visible=True, range=[0, 10], tickfont=dict(size=10), gridcolor="#dde1ee"),
+            radialaxis=dict(visible=True, range=[0, 10],
+                            tickfont=dict(size=10), gridcolor="#dde1ee"),
             angularaxis=dict(gridcolor="#dde1ee"),
         ),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=-0.18, xanchor="center", x=0.5),
+        legend=legend_cfg,
         title=dict(text=title, font=dict(size=14, color="#1a1d2e"), x=0.5, xanchor="center"),
-        height=400, margin=dict(l=30, r=30, t=50, b=60),
+        height=500 if many else 400,
+        margin=dict(l=30, r=r_margin, t=50, b=80 if not many else 20),
     )
     return fig
 
@@ -562,54 +581,51 @@ if page == "📊 Benchmark Dashboard":
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # ── Two-column: radar + stacked ──────────────────────────────────────────
-    col_radar, col_stack = st.columns([1, 1])
+    # ── Radar ─────────────────────────────────────────────────────────────────
+    st.markdown("#### Risk dimension comparison")
+    sel_cos = st.multiselect(
+        "Select companies to compare (all 25 supported)",
+        options=view["Company"].tolist(),
+        default=view["Company"].tolist()[:3],
+    )
+    if sel_cos:
+        radar_rows = (
+            view[view["Company"].isin(sel_cos)][["Company"] + COMPONENT_KEYS].to_dict("records")
+        )
+        st.plotly_chart(radar_chart(radar_rows), use_container_width=True)
 
-    with col_radar:
-        st.markdown("#### Risk dimension comparison")
-        sel_cos = st.multiselect(
-            "Select companies (max 6)",
-            options=view["Company"].tolist(),
-            default=view["Company"].tolist()[:3],
-        )
-        if sel_cos:
-            radar_rows = (
-                view[view["Company"].isin(sel_cos)][["Company"] + COMPONENT_KEYS].to_dict("records")
-            )
-            st.plotly_chart(radar_chart(radar_rows), use_container_width=True)
-
-    with col_stack:
-        st.markdown("#### Weighted component breakdown")
-        cb = view.copy()
-        cb["HQ Risk (w)"]      = 0.15 * cb["HQ Risk"]
-        cb["Revenue (w)"]       = 0.25 * cb["Revenue Exposure"]
-        cb["Supply Chain (w)"]  = 0.25 * cb["Supply Chain"]
-        cb["Facility (w)"]      = 0.15 * cb["Facility Risk"]
-        cb["Financial (w)"]     = 0.20 * cb["Financial Exposure"]
-        melted = cb[["Company", "HQ Risk (w)", "Revenue (w)", "Supply Chain (w)",
-                     "Facility (w)", "Financial (w)"]].melt(
-            id_vars="Company", var_name="Component", value_name="Score")
-        stack_pal = {"HQ Risk (w)": "#4b6fff", "Revenue (w)": "#00c897",
-                     "Supply Chain (w)": "#f05545", "Facility (w)": "#ff9d00",
-                     "Financial (w)": "#a259ff"}
-        fig_stack = px.bar(
-            melted, x="Company", y="Score", color="Component",
-            color_discrete_map=stack_pal,
-            barmode="stack", height=500,
-        )
-        fig_stack.update_layout(
-            plot_bgcolor="#f7f8fc",
-            paper_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11),
-                       automargin=True, title=None),
-            yaxis=dict(gridcolor="#e4e7f0", title="Weighted Score"),
-            bargap=0.35,
-            margin=dict(t=20, b=20, r=160),
-            legend=dict(orientation="v", yanchor="middle", y=0.5,
-                        xanchor="left", x=1.02,
-                        title=None, font=dict(size=12)),
-        )
-        st.plotly_chart(fig_stack, use_container_width=True)
+    # ── Stacked ───────────────────────────────────────────────────────────────
+    st.markdown("#### Weighted component breakdown")
+    cb = view.copy()
+    cb["HQ Risk (w)"]      = 0.15 * cb["HQ Risk"]
+    cb["Revenue (w)"]       = 0.25 * cb["Revenue Exposure"]
+    cb["Supply Chain (w)"]  = 0.25 * cb["Supply Chain"]
+    cb["Facility (w)"]      = 0.15 * cb["Facility Risk"]
+    cb["Financial (w)"]     = 0.20 * cb["Financial Exposure"]
+    melted = cb[["Company", "HQ Risk (w)", "Revenue (w)", "Supply Chain (w)",
+                 "Facility (w)", "Financial (w)"]].melt(
+        id_vars="Company", var_name="Component", value_name="Score")
+    stack_pal = {"HQ Risk (w)": "#4b6fff", "Revenue (w)": "#00c897",
+                 "Supply Chain (w)": "#f05545", "Facility (w)": "#ff9d00",
+                 "Financial (w)": "#a259ff"}
+    fig_stack = px.bar(
+        melted, x="Company", y="Score", color="Component",
+        color_discrete_map=stack_pal,
+        barmode="stack", height=500,
+    )
+    fig_stack.update_layout(
+        plot_bgcolor="#f7f8fc",
+        paper_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11),
+                   automargin=True, title=None),
+        yaxis=dict(gridcolor="#e4e7f0", title="Weighted Score"),
+        bargap=0.35,
+        margin=dict(t=20, b=20, r=160),
+        legend=dict(orientation="v", yanchor="middle", y=0.5,
+                    xanchor="left", x=1.02,
+                    title=None, font=dict(size=12)),
+    )
+    st.plotly_chart(fig_stack, use_container_width=True)
 
     # ── Data table ───────────────────────────────────────────────────────────
     st.markdown("#### Full data table")
