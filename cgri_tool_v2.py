@@ -962,7 +962,7 @@ $$
 | ≥ 6.5 | 🔴 Very High |
 
 ### Data sources
-- **Country GRI scores** — 147 countries (internal research dataset)
+- **Country GRI scores** — 147 countries ([geopriskindex.com](https://www.geopriskindex.com))
 - **Sector multipliers** — S&P Global Industry Risk Assessment
 - **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348**
 - **Benchmark scores** — 25 global companies (internal CGRI Excel template)
