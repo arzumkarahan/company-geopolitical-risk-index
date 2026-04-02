@@ -669,6 +669,7 @@ if page == "📊 Benchmark Dashboard":
         return f"background-color: {bg}; color: {text}; font-weight: 600; border-radius: 4px;"
 
     tbl = view[disp_cols].reset_index(drop=True)
+    tbl.index = tbl.index + 1
     styled = tbl.style.format(fmt).map(style_risk, subset=["Risk Category"])
     st.dataframe(styled, use_container_width=True, height=380)
     csv_bytes = view[disp_cols].to_csv(index=False).encode()
