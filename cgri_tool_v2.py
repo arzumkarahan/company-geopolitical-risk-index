@@ -636,10 +636,18 @@ if page == "📊 Benchmark Dashboard":
         "Supply Chain": "{:.2f}", "Facility Risk": "{:.2f}", "Financial Exposure": "{:.0f}",
         "Sector Multiplier": "{:.2f}", "Volatility Multiplier": "{:.4f}",
     }
-    st.dataframe(
-        view[disp_cols].reset_index(drop=True).style.format(fmt),
-        use_container_width=True, height=380,
-    )
+    # Colour palette for Risk Category cells
+    RC_BG   = {"Low": "#d6f5e3", "Moderate": "#fef3d8", "High": "#fde8d5", "Very High": "#fad7d5"}
+    RC_TEXT = {"Low": "#1a6b3c", "Moderate": "#7a5000", "High": "#7a3000", "Very High": "#7a1010"}
+
+    def style_risk(val):
+        bg   = RC_BG.get(val, "")
+        text = RC_TEXT.get(val, "")
+        return f"background-color: {bg}; color: {text}; font-weight: 600; border-radius: 4px;"
+
+    tbl = view[disp_cols].reset_index(drop=True)
+    styled = tbl.style.format(fmt).map(style_risk, subset=["Risk Category"])
+    st.dataframe(styled, use_container_width=True, height=380)
     csv_bytes = view[disp_cols].to_csv(index=False).encode()
     st.download_button("⬇ Download CSV", data=csv_bytes,
                        file_name="cgri_benchmark_2024.csv", mime="text/csv")
