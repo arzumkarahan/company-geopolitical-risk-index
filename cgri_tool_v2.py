@@ -595,7 +595,7 @@ if page == "📊 Benchmark Dashboard":
         fig_stack = px.bar(
             melted, x="Company", y="Score", color="Component",
             color_discrete_map=stack_pal,
-            barmode="stack", height=460,
+            barmode="stack", height=500,
         )
         fig_stack.update_layout(
             plot_bgcolor="#f7f8fc",
@@ -604,8 +604,9 @@ if page == "📊 Benchmark Dashboard":
                        tickfont=dict(size=11), automargin=True),
             yaxis=dict(gridcolor="#e4e7f0", title="Weighted Score"),
             bargap=0.35,
-            margin=dict(b=10),
-            legend=dict(orientation="h", yanchor="bottom", y=-0.08, xanchor="center", x=0.5),
+            margin=dict(t=20, b=160),
+            legend=dict(orientation="h", yanchor="top", y=-0.28, xanchor="center", x=0.5,
+                        font=dict(size=12)),
         )
         st.plotly_chart(fig_stack, use_container_width=True)
 
