@@ -518,24 +518,6 @@ with st.sidebar:
 
     st.divider()
 
-    # ── Calculator inputs live in sidebar ──────────────────────────────────
-    if page == "🧮 Custom Calculator":
-        st.markdown("### Company profile")
-        company_name    = st.text_input("Company name", value="My Company")
-        hq_country      = st.selectbox("HQ country", country_options)
-        sector          = st.selectbox("Sector (S&P Global)", sector_options)
-        net_debt_ebitda = st.number_input(
-            "Net Debt / EBITDA", value=1.0, step=0.1, format="%.2f",
-            help="Determines Financial Leverage multiplier (0.8 / 0.9 / 1.0 / 1.1).",
-        )
-        fin_prev = net_debt_to_financial_multiplier(net_debt_ebitda)
-        st.markdown(
-            f"<div style='font-size:0.82rem;color:#9aa0c0;margin-top:-6px'>Financial Leverage multiplier: <b style='color:#fff'>×{fin_prev}</b></div>",
-            unsafe_allow_html=True,
-        )
-        st.divider()
-        run_calc = st.button("🔍 Compute CGRI", type="primary", use_container_width=True)
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # PAGE: BENCHMARK DASHBOARD
@@ -671,19 +653,30 @@ if page == "📊 Benchmark Dashboard":
 elif page == "🧮 Custom Calculator":
 
     st.markdown("## Custom CGRI Calculator")
-    st.markdown(
-        "Company profile inputs (name, HQ, sector, net debt) are in the **sidebar**. "
-        "Fill in the three exposure tables below, then click **Compute CGRI**."
+
+    # ── Step 1: Company profile ──────────────────────────────────────────────
+    st.markdown("### Step 1 — Company profile")
+    p1, p2, p3, p4 = st.columns([2, 2, 2, 1.5])
+    company_name    = p1.text_input("Company name", value="My Company")
+    hq_country      = p2.selectbox("HQ country", country_options)
+    sector          = p3.selectbox("Sector (S&P Global)", sector_options)
+    net_debt_ebitda = p4.number_input(
+        "Net Debt / EBITDA", value=1.0, step=0.1, format="%.2f",
+        help="Determines Financial Leverage multiplier (0.8 / 0.9 / 1.0 / 1.1).",
     )
+    fin_prev = net_debt_to_financial_multiplier(net_debt_ebitda)
+    p4.caption(f"Leverage multiplier: **×{fin_prev}**")
+
+    st.markdown("---")
+
+    # ── Step 2: Exposure tables ──────────────────────────────────────────────
+    st.markdown("### Step 2 — Geographic exposure")
     st.info(
         "**Weights are automatically standardised to sum to 100 %.** "
-        "You can enter any raw units (revenues in USD, headcount, number of sites, etc.) — "
-        "the tool divides each value by the column total before computing. "
-        "A live share column shows the normalised % for each row. "
-        "Rows with a blank country or a zero weight are ignored.",
+        "Enter any raw unit (% of sales, USD mn, supplier count, number of sites, etc.). "
+        "Rows with a blank country or zero weight are ignored.",
         icon="ℹ️",
     )
-    st.markdown("---")
 
     init_rows("rev"); init_rows("sup"); init_rows("supfac")
 
@@ -712,7 +705,10 @@ elif page == "🧮 Custom Calculator":
 
     st.markdown("---")
 
-    # ── Results ──────────────────────────────────────────────────────────────
+    # ── Step 3: Compute ──────────────────────────────────────────────────────
+    st.markdown("### Step 3 — Compute")
+    run_calc = st.button("🔍 Compute CGRI", type="primary")
+
     if run_calc:
         missing = []
         if not rev_input:    missing.append("Revenue by country")
