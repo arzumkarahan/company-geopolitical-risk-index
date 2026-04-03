@@ -6,20 +6,18 @@ Methodology strictly follows the Excel template in data/processed/.
 Formula
 -------
 CGRI = (0.15 × HQ_Risk
-       + 0.25 × Revenue_Exposure
-       + 0.25 × SupplyChain_Exposure
-       + 0.15 × Facility_Risk
-       + 0.20 × Financial_Exposure)
+       + 0.45 × Revenue_Exposure
+       + 0.40 × SupplyChain_Exposure)
        × Sector_Multiplier
        × Volatility_Multiplier
+       × Financial_Leverage_Multiplier
 
 Component formulas
 ------------------
-HQ Risk             : country GRI of headquarters country
-Revenue Exposure    : Σ(GRI_c × rev_std_c) × HHI_sub(Σ rev_std_c²)
-Supply Chain        : (0.5 × sup_comp + 0.5 × fac_comp) × HHI_sub(avg_HHI)
-Facility Risk       : Σ(GRI_c × fac_std_c)  [no HHI adjustment]
-Financial Exposure  : discrete score 2–10 derived from Net Debt / EBITDA
+HQ Risk                    : country GRI of headquarters country
+Revenue Exposure           : Σ(GRI_c × rev_std_c) × HHI_sub(Σ rev_std_c²)
+Supply Chain               : (0.5 × sup_comp + 0.5 × fac_comp) × HHI_sub(avg_HHI)
+Financial Leverage Mult.   : 0.8 (Net D/EBITDA < 0), 0.9 (0–2), 1.0 (2–4), 1.1 (≥ 4)
 """
 
 from pathlib import Path
@@ -136,17 +134,12 @@ def hhi_submultiplier(h: float) -> float:
     return 1.50
 
 
-def net_debt_to_financial_score(ratio: float) -> int:
+def net_debt_to_financial_multiplier(ratio: float) -> float:
     x = float(ratio)
-    if x < -1: return 2
-    if x <  0: return 3
-    if x <  1: return 4
-    if x <  2: return 5
-    if x <  3: return 6
-    if x <  4: return 7
-    if x <  5: return 8
-    if x <  6: return 9
-    return 10
+    if x < 0: return 0.8
+    if x < 2: return 0.9
+    if x < 4: return 1.0
+    return 1.1
 
 
 def compute_revenue_exposure(revenue_by_country: dict, country_risk: dict) -> dict:
@@ -191,7 +184,7 @@ def compute_facility_risk(facility_by_country: dict, country_risk: dict) -> dict
 def compute_cgri(
     hq_country: str, sector: str, net_debt_ebitda: float,
     revenue_by_country: dict, suppliers_by_country: dict,
-    supplier_facilities_by_country: dict, facility_by_country: dict,
+    supplier_facilities_by_country: dict,
     country_risk: dict, sector_mult_lookup: dict,
     volatility_mult: float, company_name: str = "Custom Company",
 ) -> dict:
@@ -202,22 +195,21 @@ def compute_cgri(
     if sector not in sector_mult_lookup:
         raise KeyError(f"Sector '{sector}' not found in sector multiplier table.")
 
-    hq_risk = float(country_risk[hq_country])
-    rev     = compute_revenue_exposure(revenue_by_country, country_risk)
-    sc      = compute_supply_chain_exposure(suppliers_by_country, supplier_facilities_by_country, country_risk)
-    fac     = compute_facility_risk(facility_by_country, country_risk)
-    fin     = net_debt_to_financial_score(net_debt_ebitda)
-    sec_m   = float(sector_mult_lookup[sector])
+    hq_risk  = float(country_risk[hq_country])
+    rev      = compute_revenue_exposure(revenue_by_country, country_risk)
+    sc       = compute_supply_chain_exposure(suppliers_by_country, supplier_facilities_by_country, country_risk)
+    fin_mult = net_debt_to_financial_multiplier(net_debt_ebitda)
+    sec_m    = float(sector_mult_lookup[sector])
 
-    base  = 0.15*hq_risk + 0.25*rev["final"] + 0.25*sc["final"] + 0.15*fac["final"] + 0.20*fin
-    final = base * sec_m * volatility_mult
+    base  = 0.15*hq_risk + 0.45*rev["final"] + 0.40*sc["final"]
+    final = base * sec_m * volatility_mult * fin_mult
 
     return {
         "company": company_name, "hq_country": hq_country, "sector": sector,
         "net_debt_ebitda": float(net_debt_ebitda),
         "hq_risk": hq_risk, "revenue_exposure": rev["final"],
-        "supply_chain": sc["final"], "facility_risk": fac["final"],
-        "financial_exposure": fin,
+        "supply_chain": sc["final"],
+        "financial_multiplier": fin_mult,
         "sector_multiplier": sec_m, "volatility_multiplier": float(volatility_mult),
         "final_cgri": final,
         "rev_hhi": rev["hhi"], "rev_hhi_sub": rev["hhi_sub"],
@@ -226,7 +218,7 @@ def compute_cgri(
         "sc_sup_component": sc["sup_component"], "sc_fac_component": sc["fac_component"],
         "sc_intermediate": sc["intermediate"],
         "rev_shares": rev["std_shares"], "sup_shares": sc["sup_std"],
-        "fac_sup_shares": sc["fac_std"], "fac_shares": fac["std_shares"],
+        "fac_sup_shares": sc["fac_std"],
     }
 
 
@@ -270,11 +262,10 @@ def load_all():
                 "HQ Risk":               float(ws3.cell(r, 2).value),
                 "Revenue Exposure":      float(ws3.cell(r, 3).value),
                 "Supply Chain":          float(ws3.cell(r, 4).value),
-                "Facility Risk":         float(ws3.cell(r, 5).value),
-                "Financial Exposure":    float(ws3.cell(r, 6).value),
-                "Sector Multiplier":     float(ws3.cell(r, 7).value),
-                "Volatility Multiplier": float(ws3.cell(r, 8).value),
-                "Final CGRI":            float(ws3.cell(r, 9).value),
+                "Financial Multiplier":  float(ws3.cell(r, 5).value),
+                "Sector Multiplier":     float(ws3.cell(r, 6).value),
+                "Volatility Multiplier": float(ws3.cell(r, 7).value),
+                "Final CGRI":            float(ws3.cell(r, 8).value),
             })
         except (TypeError, ValueError):
             continue
@@ -311,7 +302,7 @@ RISK_COLORS = {
     "High":      "#e67e22",
     "Very High": "#e74c3c",
 }
-COMPONENT_KEYS = ["HQ Risk", "Revenue Exposure", "Supply Chain", "Facility Risk", "Financial Exposure"]
+COMPONENT_KEYS = ["HQ Risk", "Revenue Exposure", "Supply Chain"]
 
 
 def risk_label(score: float) -> tuple[str, str]:
@@ -344,7 +335,7 @@ def comp_card(label: str, value: str, detail: str = ""):
 
 
 def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
-    dims = ["HQ Risk", "Revenue Exposure", "Supply Chain", "Facility Risk", "Financial Exposure"]
+    dims = ["HQ Risk", "Revenue Exposure", "Supply Chain"]
     # 25-colour palette — Alphabet (26) covers all benchmark companies
     pal  = px.colors.qualitative.Alphabet
     n    = len(rows)
@@ -535,11 +526,11 @@ with st.sidebar:
         sector          = st.selectbox("Sector (S&P Global)", sector_options)
         net_debt_ebitda = st.number_input(
             "Net Debt / EBITDA", value=1.0, step=0.1, format="%.2f",
-            help="Determines Financial Exposure score (2–10 scale).",
+            help="Determines Financial Leverage multiplier (0.8 / 0.9 / 1.0 / 1.1).",
         )
-        fin_prev = net_debt_to_financial_score(net_debt_ebitda)
+        fin_prev = net_debt_to_financial_multiplier(net_debt_ebitda)
         st.markdown(
-            f"<div style='font-size:0.82rem;color:#9aa0c0;margin-top:-6px'>Financial Exposure score: <b style='color:#fff'>{fin_prev}/10</b></div>",
+            f"<div style='font-size:0.82rem;color:#9aa0c0;margin-top:-6px'>Financial Leverage multiplier: <b style='color:#fff'>×{fin_prev}</b></div>",
             unsafe_allow_html=True,
         )
         st.divider()
@@ -620,17 +611,13 @@ if page == "📊 Benchmark Dashboard":
     # ── Stacked ───────────────────────────────────────────────────────────────
     st.markdown("#### Weighted component breakdown")
     cb = view.copy()
-    cb["HQ Risk (w)"]      = 0.15 * cb["HQ Risk"]
-    cb["Revenue (w)"]       = 0.25 * cb["Revenue Exposure"]
-    cb["Supply Chain (w)"]  = 0.25 * cb["Supply Chain"]
-    cb["Facility (w)"]      = 0.15 * cb["Facility Risk"]
-    cb["Financial (w)"]     = 0.20 * cb["Financial Exposure"]
-    melted = cb[["Company", "HQ Risk (w)", "Revenue (w)", "Supply Chain (w)",
-                 "Facility (w)", "Financial (w)"]].melt(
+    cb["HQ Risk (w)"]     = 0.15 * cb["HQ Risk"]
+    cb["Revenue (w)"]     = 0.45 * cb["Revenue Exposure"]
+    cb["Supply Chain (w)"] = 0.40 * cb["Supply Chain"]
+    melted = cb[["Company", "HQ Risk (w)", "Revenue (w)", "Supply Chain (w)"]].melt(
         id_vars="Company", var_name="Component", value_name="Score")
     stack_pal = {"HQ Risk (w)": "#4b6fff", "Revenue (w)": "#00c897",
-                 "Supply Chain (w)": "#f05545", "Facility (w)": "#ff9d00",
-                 "Financial (w)": "#a259ff"}
+                 "Supply Chain (w)": "#f05545"}
     fig_stack = px.bar(
         melted, x="Company", y="Score", color="Component",
         color_discrete_map=stack_pal,
@@ -653,10 +640,10 @@ if page == "📊 Benchmark Dashboard":
     # ── Data table ───────────────────────────────────────────────────────────
     st.markdown("#### Full data table")
     disp_cols = ["Company", "Sector", "Risk Category", "Final CGRI"] + COMPONENT_KEYS + \
-                ["Sector Multiplier", "Volatility Multiplier"]
+                ["Financial Multiplier", "Sector Multiplier", "Volatility Multiplier"]
     fmt = {
         "Final CGRI": "{:.2f}", "HQ Risk": "{:.2f}", "Revenue Exposure": "{:.2f}",
-        "Supply Chain": "{:.2f}", "Facility Risk": "{:.2f}", "Financial Exposure": "{:.0f}",
+        "Supply Chain": "{:.2f}", "Financial Multiplier": "{:.1f}",
         "Sector Multiplier": "{:.2f}", "Volatility Multiplier": "{:.4f}",
     }
     # Colour palette for Risk Category cells
@@ -686,7 +673,7 @@ elif page == "🧮 Custom Calculator":
     st.markdown("## Custom CGRI Calculator")
     st.markdown(
         "Company profile inputs (name, HQ, sector, net debt) are in the **sidebar**. "
-        "Fill in the four exposure tables below, then click **Compute CGRI**."
+        "Fill in the three exposure tables below, then click **Compute CGRI**."
     )
     st.info(
         "**Weights are automatically standardised to sum to 100 %.** "
@@ -698,7 +685,7 @@ elif page == "🧮 Custom Calculator":
     )
     st.markdown("---")
 
-    init_rows("rev"); init_rows("sup"); init_rows("supfac"); init_rows("fac")
+    init_rows("rev"); init_rows("sup"); init_rows("supfac")
 
     # ── Two-column exposure inputs ───────────────────────────────────────────
     col_a, col_b = st.columns(2, gap="large")
@@ -710,24 +697,18 @@ elif page == "🧮 Custom Calculator":
         if st.button("➕ Add country", key="add_rev"):
             add_row("rev"); st.rerun()
 
-        st.markdown("#### 3  Supplier distribution")
-        st.caption("Enter supplier count or % per country. Auto-normalised to 100 %.")
-        sup_input = country_input_table("sup", country_options)
-        if st.button("➕ Add country", key="add_sup"):
-            add_row("sup"); st.rerun()
-
-    with col_b:
-        st.markdown("#### 2  Facility sites by country")
-        st.caption("Enter number of sites or % per country. Auto-normalised to 100 %.")
-        fac_input = country_input_table("fac", country_options)
-        if st.button("➕ Add country", key="add_fac"):
-            add_row("fac"); st.rerun()
-
-        st.markdown("#### 4  Supplier facility distribution")
+        st.markdown("#### 3  Supplier facility distribution")
         st.caption("Enter supplier-side facility count or % per country. Auto-normalised to 100 %.")
         supfac_input = country_input_table("supfac", country_options)
         if st.button("➕ Add country", key="add_supfac"):
             add_row("supfac"); st.rerun()
+
+    with col_b:
+        st.markdown("#### 2  Supplier distribution")
+        st.caption("Enter supplier count or % per country. Auto-normalised to 100 %.")
+        sup_input = country_input_table("sup", country_options)
+        if st.button("➕ Add country", key="add_sup"):
+            add_row("sup"); st.rerun()
 
     st.markdown("---")
 
@@ -747,7 +728,6 @@ elif page == "🧮 Custom Calculator":
                 revenue_by_country=rev_input,
                 suppliers_by_country=sup_input,
                 supplier_facilities_by_country=supfac_input,
-                facility_by_country=fac_input,
                 country_risk=country_risk,
                 sector_mult_lookup=sector_mult,
                 volatility_mult=vol_mult,
@@ -779,17 +759,15 @@ elif page == "🧮 Custom Calculator":
                     comp_card("Supply Chain", f"{result['supply_chain']:.2f}",
                               f"HHI {result['sc_hhi_combined']:.2f} → ×{result['sc_hhi_sub']:.2f}")
                 with r2b:
-                    comp_card("Facility Risk", f"{result['facility_risk']:.2f}", "no HHI adjustment")
+                    comp_card("Financial Leverage", f"×{result['financial_multiplier']:.1f}",
+                              f"Net D/EBITDA {net_debt_ebitda:.2f}")
                 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
                 r3a, r3b = st.columns(2)
                 with r3a:
-                    comp_card("Financial Exposure", f"{result['financial_exposure']}/10",
-                              f"Net D/EBITDA {net_debt_ebitda:.2f}")
-                with r3b:
                     comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
-                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-                comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
-                          "2024 VIX avg (CBOE / FRED)")
+                with r3b:
+                    comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
+                              "2024 VIX avg (CBOE / FRED)")
 
             st.markdown("---")
 
@@ -803,8 +781,6 @@ elif page == "🧮 Custom Calculator":
                     "HQ Risk":          result["hq_risk"],
                     "Revenue Exposure": result["revenue_exposure"],
                     "Supply Chain":     result["supply_chain"],
-                    "Facility Risk":    result["facility_risk"],
-                    "Financial Exposure": result["financial_exposure"],
                 }
                 # overlay benchmark average
                 bench_avg = {
@@ -812,8 +788,6 @@ elif page == "🧮 Custom Calculator":
                     "HQ Risk":          bench_df["HQ Risk"].mean(),
                     "Revenue Exposure": bench_df["Revenue Exposure"].mean(),
                     "Supply Chain":     bench_df["Supply Chain"].mean(),
-                    "Facility Risk":    bench_df["Facility Risk"].mean(),
-                    "Financial Exposure": bench_df["Financial Exposure"].mean(),
                 }
                 st.plotly_chart(
                     radar_chart([custom_radar, bench_avg], "vs. benchmark average"),
@@ -877,8 +851,7 @@ elif page == "🧮 Custom Calculator":
                 "SC Intermediate": round(result["sc_intermediate"], 4),
                 "SC HHI Combined": round(result["sc_hhi_combined"], 4),
                 "SC HHI Sub": result["sc_hhi_sub"],
-                "Facility Risk": round(result["facility_risk"], 4),
-                "Financial Exposure": result["financial_exposure"],
+                "Financial Leverage Multiplier": result["financial_multiplier"],
                 "Sector Multiplier": result["sector_multiplier"],
                 "Volatility Multiplier": round(result["volatility_multiplier"], 4),
                 "Final CGRI": round(result["final_cgri"], 4),
@@ -894,8 +867,7 @@ elif page == "🧮 Custom Calculator":
             export_json = {k: v for k, v in result.items() if not isinstance(v, dict)}
             export_json.update({"rev_shares": result["rev_shares"],
                                 "sup_shares": result["sup_shares"],
-                                "fac_sup_shares": result["fac_sup_shares"],
-                                "fac_shares": result["fac_shares"]})
+                                "fac_sup_shares": result["fac_sup_shares"]})
             e2.download_button(
                 "⬇ JSON (full detail)",
                 data=json.dumps(export_json, indent=2, default=str),
@@ -922,12 +894,10 @@ elif page == "ℹ Methodology":
 $$
 \text{CGRI} = \bigl(
   0.15 \cdot \text{HQ Risk}
-+ 0.25 \cdot \text{Revenue Exposure}
-+ 0.25 \cdot \text{Supply Chain Exposure}
-+ 0.15 \cdot \text{Facility Risk}
-+ 0.20 \cdot \text{Financial Exposure}
++ 0.45 \cdot \text{Revenue Exposure}
++ 0.40 \cdot \text{Supply Chain Exposure}
 \bigr)
-\times \text{Sector Multiplier} \times \text{Volatility Multiplier}
+\times \text{Sector Multiplier} \times \text{Volatility Multiplier} \times \text{Financial Leverage Multiplier}
 $$
 """)
 
@@ -936,13 +906,14 @@ $$
         st.markdown("""
 ### Component formulas
 
-| Component | Formula |
-|---|---|
-| **HQ Risk** | Country GRI of the headquarters location |
-| **Revenue Exposure** | Σ(GRI_c × rev_share_c) × HHI_sub |
-| **Supply Chain** | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
-| **Facility Risk** | Σ(GRI_c × fac_share_c) — no HHI adjustment |
-| **Financial Exposure** | Discrete score 2–10 from Net Debt / EBITDA |
+| Component | Weight | Formula |
+|---|---|---|
+| **HQ Risk** | 15 % | Country GRI of the headquarters location |
+| **Revenue Exposure** | 45 % | Σ(GRI_c × rev_share_c) × HHI_sub |
+| **Supply Chain** | 40 % | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
+| **Sector Multiplier** | × | S&P Global Industry Risk Assessment |
+| **Volatility Multiplier** | × | 1 + Δ% vs. long-run VIX average |
+| **Financial Leverage** | × | 0.8 / 0.9 / 1.0 / 1.1 from Net Debt / EBITDA |
 """)
 
     with c2:
@@ -956,6 +927,15 @@ $$
 | 0.25 – 0.40 | **1.10** | Somewhat concentrated |
 | 0.40 – 0.60 | **1.25** | Concentrated |
 | ≥ 0.60 | **1.50** | Highly concentrated |
+
+### Financial Leverage Multiplier
+
+| Net Debt / EBITDA | Multiplier |
+|-------------------|-----------|
+| < 0 | **0.8** |
+| 0 – < 2 | **0.9** |
+| 2 – < 4 | **1.0** |
+| ≥ 4 | **1.1** |
 """)
 
     st.markdown("""
