@@ -95,6 +95,70 @@ st.markdown("""
 
 /* ── Streamlit tabs tweak ── */
 button[data-baseweb="tab"] { font-size: 0.95rem; font-weight: 600; }
+
+/* ── Mobile responsive ── */
+@media screen and (max-width: 768px) {
+    /* Collapse the sidebar on mobile so it doesn't block the screen */
+    [data-testid="stSidebar"] {
+        transform: translateX(-110%) !important;
+        visibility: hidden !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] {
+        visibility: visible !important;
+    }
+
+    /* Stack all multi-column layouts vertically */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+    [data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Tighter main content padding */
+    .main .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 1rem !important;
+    }
+
+    /* KPI cards: reduce font size so they fit */
+    .kpi-value { font-size: 1.4rem !important; }
+    .kpi-card  { margin-bottom: 8px !important; }
+
+    /* Component cards */
+    .comp-card .cv { font-size: 1.2rem !important; }
+
+    /* Score badge */
+    .score-badge .score-num { font-size: 2.4rem !important; }
+
+    /* Country input table: make the share % and delete button compact */
+    [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(3),
+    [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(4) {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: unset !important;
+    }
+
+    /* Inputs: bigger touch targets */
+    .stSelectbox > div, .stNumberInput > div {
+        min-height: 44px !important;
+    }
+
+    /* Charts: prevent horizontal overflow */
+    .js-plotly-plot { max-width: 100% !important; }
+
+    /* Tables: allow horizontal scroll instead of squishing */
+    [data-testid="stDataFrame"] { overflow-x: auto !important; }
+
+    /* Hide the wide-layout padding Streamlit adds */
+    [data-testid="stAppViewContainer"] > section {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
