@@ -33,7 +33,7 @@ st.set_page_config(
     page_title="CGRI Tool",
     layout="wide",
     page_icon="🌐",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 # ── Custom CSS ───────────────────────────────────────────────────────────────
@@ -98,14 +98,6 @@ button[data-baseweb="tab"] { font-size: 0.95rem; font-weight: 600; }
 
 /* ── Mobile responsive ── */
 @media screen and (max-width: 768px) {
-    /* Collapse the sidebar on mobile so it doesn't block the screen */
-    [data-testid="stSidebar"] {
-        transform: translateX(-110%) !important;
-        visibility: hidden !important;
-    }
-    [data-testid="stSidebarCollapsedControl"] {
-        visibility: visible !important;
-    }
 
     /* Stack all multi-column layouts vertically */
     [data-testid="stHorizontalBlock"] {
