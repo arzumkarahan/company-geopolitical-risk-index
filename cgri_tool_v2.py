@@ -17,7 +17,7 @@ Component formulas
 HQ Risk                    : country GRI of headquarters country
 Revenue Exposure           : Σ(GRI_c × rev_std_c) × HHI_sub(Σ rev_std_c²)
 Supply Chain               : (0.5 × sup_comp + 0.5 × fac_comp) × HHI_sub(avg_HHI)
-Financial Leverage Mult.   : 0.8 (Net D/EBITDA < 0), 0.9 (0–2), 1.0 (2–4), 1.1 (≥ 4)
+Financial Leverage Mult.   : 0.8 (Net D/EBITDA < 0), 0.9 (0–2), 1.0 (2–4), 1.1 (4–6), 1.2 (≥ 6)
 """
 
 from pathlib import Path
@@ -139,7 +139,8 @@ def net_debt_to_financial_multiplier(ratio: float) -> float:
     if x < 0: return 0.8
     if x < 2: return 0.9
     if x < 4: return 1.0
-    return 1.1
+    if x < 6: return 1.1
+    return 1.2
 
 
 def compute_revenue_exposure(revenue_by_country: dict, country_risk: dict) -> dict:
@@ -242,14 +243,45 @@ def load_all():
     country_risk = dict(zip(country_df["country"], country_df["gri"]))
 
     ws2 = _ws(DATA_DIR / "Sector Risk Multiplier.xlsx", "Sector Risk Multiplier")
+
+    # Multiplier mapping from S&P Global Industry Risk Assessment label
+    _SP_LABEL_TO_MULT = {
+        "Very low risk":      0.75,
+        "Low risk":           0.85,
+        "Intermediate risk":  1.00,
+        "Moderately high risk": 1.10,
+        "High risk":          1.15,
+        "Very high risk":     1.25,
+    }
+
+    # Build full 53-sector lookup from the left-hand Sector-List columns (A & B)
+    sector_mult: dict[str, float] = {}
+    for r in range(5, ws2.max_row + 1):
+        sec_name  = ws2.cell(r, 1).value
+        sp_label  = ws2.cell(r, 2).value
+        if sec_name and sp_label:
+            sec_str = str(sec_name).strip()
+            lab_str = str(sp_label).strip()
+            if lab_str in _SP_LABEL_TO_MULT:
+                sector_mult[sec_str] = _SP_LABEL_TO_MULT[lab_str]
+
+    # Also include any benchmark-company sectors not in the S&P 53-sector list
+    # (e.g. "Insurance (Financial services)" used by Allianz)
+    for r in range(5, ws2.max_row + 1):
+        se, la, mu = ws2.cell(r,5).value, ws2.cell(r,6).value, ws2.cell(r,8).value
+        if se and isinstance(mu, (int, float)):
+            sec_str = str(se).strip()
+            if sec_str not in sector_mult:
+                sector_mult[sec_str] = float(mu)
+
+    # Build company→sector mapping from the right-hand company columns (D–H)
     sec_rows = []
     for r in range(5, ws2.max_row + 1):
         co, se, la, mu = ws2.cell(r,4).value, ws2.cell(r,5).value, ws2.cell(r,6).value, ws2.cell(r,8).value
         if co and se and isinstance(mu, (int, float)):
             sec_rows.append({"company": str(co).strip(), "sector": str(se).strip(),
                              "sp_label": str(la).strip() if la else "", "multiplier": float(mu)})
-    sector_df   = pd.DataFrame(sec_rows)
-    sector_mult = dict(zip(sector_df["sector"], sector_df["multiplier"]))
+    sector_df = pd.DataFrame(sec_rows)
 
     ws3 = _ws(DATA_DIR / "Template CGRI.xlsx", "Final Template - 2024")
     bench = []
@@ -476,7 +508,7 @@ def country_input_table(key: str, country_options: list) -> dict:
 
 country_df, country_risk, sector_df, sector_mult, bench_df, vol_mult = load_all()
 country_options = sorted(country_risk.keys())
-sector_options  = sorted(sector_df["sector"].unique())
+sector_options  = sorted(sector_mult.keys())
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -662,7 +694,7 @@ elif page == "🧮 Custom Calculator":
     sector          = p3.selectbox("Sector (S&P Global)", sector_options)
     net_debt_ebitda = p4.number_input(
         "Net Debt / EBITDA", value=1.0, step=0.1, format="%.2f",
-        help="Determines Financial Leverage multiplier (0.8 / 0.9 / 1.0 / 1.1).",
+        help="Determines Financial Leverage multiplier: <0 → 0.8 · 0–2 → 0.9 · 2–4 → 1.0 · 4–6 → 1.1 · ≥6 → 1.2",
     )
     fin_prev = net_debt_to_financial_multiplier(net_debt_ebitda)
     p4.caption(f"Leverage multiplier: **×{fin_prev}**")
@@ -909,7 +941,7 @@ $$
 | **Supply Chain** | 40 % | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
 | **Sector Multiplier** | × | S&P Global Industry Risk Assessment |
 | **Volatility Multiplier** | × | 1 + Δ% vs. long-run VIX average |
-| **Financial Leverage** | × | 0.8 / 0.9 / 1.0 / 1.1 from Net Debt / EBITDA |
+| **Financial Leverage** | × | 0.8 / 0.9 / 1.0 / 1.1 / 1.2 from Net Debt / EBITDA |
 """)
 
     with c2:
@@ -931,7 +963,8 @@ $$
 | < 0 | **0.8** |
 | 0 – < 2 | **0.9** |
 | 2 – < 4 | **1.0** |
-| ≥ 4 | **1.1** |
+| 4 – < 6 | **1.1** |
+| ≥ 6 | **1.2** |
 """)
 
     st.markdown("""
