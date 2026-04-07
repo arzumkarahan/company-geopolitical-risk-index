@@ -849,110 +849,122 @@ elif page == "🧮 Custom Calculator":
                 volatility_mult=vol_mult,
                 company_name=company_name,
             )
+            st.session_state["cgri_result"] = result
+            st.session_state["cgri_net_debt"] = net_debt_ebitda
+            st.session_state["cgri_sector"] = sector
+        except Exception as exc:
+            st.error(f"⚠ {exc}")
+            st.exception(exc)
 
-            final = result["final_cgri"]
-            cat, col = risk_label(final)
+    if "cgri_result" in st.session_state:
+        result = st.session_state["cgri_result"]
+        net_debt_ebitda = st.session_state["cgri_net_debt"]
+        sector = st.session_state["cgri_sector"]
 
-            st.markdown(f"## Results — {company_name}")
+        final = result["final_cgri"]
+        cat, col = risk_label(final)
+        company_name = result["company"]
 
-            # ── Gauge + component cards ──────────────────────────────────────
-            g_col, m_col = st.columns([1, 1], gap="large")
+        st.markdown(f"## Results — {company_name}")
 
-            with g_col:
-                st.plotly_chart(gauge_chart(final, company_name), use_container_width=True)
+        # ── Gauge + component cards ──────────────────────────────────────
+        g_col, m_col = st.columns([1, 1], gap="large")
 
-            with m_col:
-                st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-                r1a, r1b = st.columns(2)
-                with r1a:
-                    comp_card("HQ Risk", f"{result['hq_risk']:.2f}", hq_country)
-                with r1b:
-                    comp_card("Revenue Exposure", f"{result['revenue_exposure']:.2f}",
-                              f"HHI {result['rev_hhi']:.2f} → ×{result['rev_hhi_sub']:.2f}")
-                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-                r2a, r2b = st.columns(2)
-                with r2a:
-                    comp_card("Supply Chain", f"{result['supply_chain']:.2f}",
-                              f"HHI {result['sc_hhi_combined']:.2f} → ×{result['sc_hhi_sub']:.2f}")
-                with r2b:
-                    comp_card("Financial Leverage", f"×{result['financial_multiplier']:.1f}",
-                              f"Net D/EBITDA {net_debt_ebitda:.2f}")
-                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-                r3a, r3b = st.columns(2)
-                with r3a:
-                    comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
-                with r3b:
-                    comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
-                              "2024 VIX avg (CBOE / FRED)")
+        with g_col:
+            st.plotly_chart(gauge_chart(final, company_name), use_container_width=True)
 
-            st.markdown("---")
+        with m_col:
+            st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+            r1a, r1b = st.columns(2)
+            with r1a:
+                comp_card("HQ Risk", f"{result['hq_risk']:.2f}", hq_country)
+            with r1b:
+                comp_card("Revenue Exposure", f"{result['revenue_exposure']:.2f}",
+                          f"HHI {result['rev_hhi']:.2f} → ×{result['rev_hhi_sub']:.2f}")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            r2a, r2b = st.columns(2)
+            with r2a:
+                comp_card("Supply Chain", f"{result['supply_chain']:.2f}",
+                          f"HHI {result['sc_hhi_combined']:.2f} → ×{result['sc_hhi_sub']:.2f}")
+            with r2b:
+                comp_card("Financial Leverage", f"×{result['financial_multiplier']:.1f}",
+                          f"Net D/EBITDA {net_debt_ebitda:.2f}")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            r3a, r3b = st.columns(2)
+            with r3a:
+                comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
+            with r3b:
+                comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
+                          "2024 VIX avg (CBOE / FRED)")
 
-            # ── Radar + benchmark comparison ─────────────────────────────────
-            rdr_col, cmp_col = st.columns(2, gap="large")
+        st.markdown("---")
 
-            with rdr_col:
-                st.markdown("#### Risk profile (spider chart)")
-                expanded_custom = st.toggle(
-                    "Expanded view",
-                    value=False,
-                    help="Splits Supply Chain into Supplier Domiciles & Facilities, adds multipliers (rescaled 0–10)",
-                    key="expanded_custom_radar",
-                )
-                custom_radar = {
-                    "Company":          company_name,
-                    "HQ Risk":          result["hq_risk"],
-                    "Revenue Exposure": result["revenue_exposure"],
-                    "Supply Chain":     result["supply_chain"],
-                    "Sup. Domiciles":   result["sc_sup_component"],
-                    "Sup. Facilities":  result["sc_fac_component"],
-                    "Financial Mult.":  result["financial_multiplier"],
-                    "Sector Mult.":     result["sector_multiplier"],
-                }
-                bench_avg = {
-                    "Company":          "Benchmark avg",
-                    "HQ Risk":          bench_df["HQ Risk"].mean(),
-                    "Revenue Exposure": bench_df["Revenue Exposure"].mean(),
-                    "Supply Chain":     bench_df["Supply Chain"].mean(),
-                    "Sup. Domiciles":   bench_df["Supply Chain"].mean(),
-                    "Sup. Facilities":  bench_df["Supply Chain"].mean(),
-                    "Financial Mult.":  bench_df["Financial Multiplier"].mean(),
-                    "Sector Mult.":     bench_df["Sector Multiplier"].mean(),
-                }
-                st.plotly_chart(
-                    radar_chart([custom_radar, bench_avg], "vs. benchmark average",
-                                expanded=expanded_custom),
-                    use_container_width=True,
-                )
+        # ── Radar + benchmark comparison ─────────────────────────────────
+        rdr_col, cmp_col = st.columns(2, gap="large")
 
-            with cmp_col:
-                st.markdown("#### Ranking vs. benchmark portfolio")
-                custom_row = pd.DataFrame([{
-                    "Company": f"▶ {company_name}", "Final CGRI": final, "Risk Category": cat,
-                }])
-                compare = pd.concat(
-                    [bench_df[["Company", "Final CGRI", "Risk Category"]], custom_row],
-                    ignore_index=True,
-                ).sort_values("Final CGRI", ascending=False)
-                fig_cmp = px.bar(
-                    compare, x="Company", y="Final CGRI",
-                    color="Risk Category", color_discrete_map=RISK_COLORS,
-                    height=400,
-                )
-                fig_cmp.update_layout(
-                    showlegend=False,
-                    plot_bgcolor="#f7f8fc",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11), automargin=True),
-                    yaxis=dict(gridcolor="#e4e7f0", title="CGRI Score"),
-                    bargap=0.3,
-                    margin=dict(b=10),
-                )
-                st.plotly_chart(fig_cmp, use_container_width=True)
+        with rdr_col:
+            st.markdown("#### Risk profile (spider chart)")
+            expanded_custom = st.toggle(
+                "Expanded view",
+                value=False,
+                help="Splits Supply Chain into Supplier Domiciles & Facilities, adds multipliers (rescaled 0–10)",
+                key="expanded_custom_radar",
+            )
+            custom_radar = {
+                "Company":          company_name,
+                "HQ Risk":          result["hq_risk"],
+                "Revenue Exposure": result["revenue_exposure"],
+                "Supply Chain":     result["supply_chain"],
+                "Sup. Domiciles":   result["sc_sup_component"],
+                "Sup. Facilities":  result["sc_fac_component"],
+                "Financial Mult.":  result["financial_multiplier"],
+                "Sector Mult.":     result["sector_multiplier"],
+            }
+            bench_avg = {
+                "Company":          "Benchmark avg",
+                "HQ Risk":          bench_df["HQ Risk"].mean(),
+                "Revenue Exposure": bench_df["Revenue Exposure"].mean(),
+                "Supply Chain":     bench_df["Supply Chain"].mean(),
+                "Sup. Domiciles":   bench_df["Supply Chain"].mean(),
+                "Sup. Facilities":  bench_df["Supply Chain"].mean(),
+                "Financial Mult.":  bench_df["Financial Multiplier"].mean(),
+                "Sector Mult.":     bench_df["Sector Multiplier"].mean(),
+            }
+            st.plotly_chart(
+                radar_chart([custom_radar, bench_avg], "vs. benchmark average",
+                            expanded=expanded_custom),
+                use_container_width=True,
+            )
 
-            # ── Supply chain detail ──────────────────────────────────────────
-            with st.expander("Supply chain detail"):
-                st.markdown(
-                    f"""
+        with cmp_col:
+            st.markdown("#### Ranking vs. benchmark portfolio")
+            custom_row = pd.DataFrame([{
+                "Company": f"▶ {company_name}", "Final CGRI": final, "Risk Category": cat,
+            }])
+            compare = pd.concat(
+                [bench_df[["Company", "Final CGRI", "Risk Category"]], custom_row],
+                ignore_index=True,
+            ).sort_values("Final CGRI", ascending=False)
+            fig_cmp = px.bar(
+                compare, x="Company", y="Final CGRI",
+                color="Risk Category", color_discrete_map=RISK_COLORS,
+                height=400,
+            )
+            fig_cmp.update_layout(
+                showlegend=False,
+                plot_bgcolor="#f7f8fc",
+                paper_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11), automargin=True),
+                yaxis=dict(gridcolor="#e4e7f0", title="CGRI Score"),
+                bargap=0.3,
+                margin=dict(b=10),
+            )
+            st.plotly_chart(fig_cmp, use_container_width=True)
+
+        # ── Supply chain detail ──────────────────────────────────────────
+        with st.expander("Supply chain detail"):
+            st.markdown(
+                f"""
 | | Value |
 |---|---|
 | Suppliers component (Σ GRI × sup_share) | {result['sc_sup_component']:.4f} |
@@ -964,50 +976,46 @@ elif page == "🧮 Custom Calculator":
 | HHI submultiplier | {result['sc_hhi_sub']:.2f} |
 | **Supply Chain Exposure** | **{result['supply_chain']:.4f}** |
 """
-                )
-
-            # ── Export ───────────────────────────────────────────────────────
-            st.markdown("#### Export results")
-            summary = {
-                "Company": company_name, "HQ Country": result["hq_country"],
-                "Sector": result["sector"], "Net Debt/EBITDA": result["net_debt_ebitda"],
-                "HQ Risk": round(result["hq_risk"], 4),
-                "Revenue Exposure": round(result["revenue_exposure"], 4),
-                "Revenue HHI": round(result["rev_hhi"], 4),
-                "Revenue HHI Sub": result["rev_hhi_sub"],
-                "Supply Chain Exposure": round(result["supply_chain"], 4),
-                "SC Sup Component": round(result["sc_sup_component"], 4),
-                "SC Fac Component": round(result["sc_fac_component"], 4),
-                "SC Intermediate": round(result["sc_intermediate"], 4),
-                "SC HHI Combined": round(result["sc_hhi_combined"], 4),
-                "SC HHI Sub": result["sc_hhi_sub"],
-                "Financial Leverage Multiplier": result["financial_multiplier"],
-                "Sector Multiplier": result["sector_multiplier"],
-                "Volatility Multiplier": round(result["volatility_multiplier"], 4),
-                "Final CGRI": round(result["final_cgri"], 4),
-                "Risk Category": cat,
-            }
-            e1, e2 = st.columns(2)
-            e1.download_button(
-                "⬇ CSV (summary)",
-                data=pd.DataFrame([summary]).to_csv(index=False).encode(),
-                file_name=f"{company_name.replace(' ','_')}_cgri.csv",
-                mime="text/csv",
-            )
-            export_json = {k: v for k, v in result.items() if not isinstance(v, dict)}
-            export_json.update({"rev_shares": result["rev_shares"],
-                                "sup_shares": result["sup_shares"],
-                                "fac_sup_shares": result["fac_sup_shares"]})
-            e2.download_button(
-                "⬇ JSON (full detail)",
-                data=json.dumps(export_json, indent=2, default=str),
-                file_name=f"{company_name.replace(' ','_')}_cgri.json",
-                mime="application/json",
             )
 
-        except Exception as exc:
-            st.error(f"⚠ {exc}")
-            st.exception(exc)
+        # ── Export ───────────────────────────────────────────────────────
+        st.markdown("#### Export results")
+        summary = {
+            "Company": company_name, "HQ Country": result["hq_country"],
+            "Sector": result["sector"], "Net Debt/EBITDA": result["net_debt_ebitda"],
+            "HQ Risk": round(result["hq_risk"], 4),
+            "Revenue Exposure": round(result["revenue_exposure"], 4),
+            "Revenue HHI": round(result["rev_hhi"], 4),
+            "Revenue HHI Sub": result["rev_hhi_sub"],
+            "Supply Chain Exposure": round(result["supply_chain"], 4),
+            "SC Sup Component": round(result["sc_sup_component"], 4),
+            "SC Fac Component": round(result["sc_fac_component"], 4),
+            "SC Intermediate": round(result["sc_intermediate"], 4),
+            "SC HHI Combined": round(result["sc_hhi_combined"], 4),
+            "SC HHI Sub": result["sc_hhi_sub"],
+            "Financial Leverage Multiplier": result["financial_multiplier"],
+            "Sector Multiplier": result["sector_multiplier"],
+            "Volatility Multiplier": round(result["volatility_multiplier"], 4),
+            "Final CGRI": round(result["final_cgri"], 4),
+            "Risk Category": cat,
+        }
+        e1, e2 = st.columns(2)
+        e1.download_button(
+            "⬇ CSV (summary)",
+            data=pd.DataFrame([summary]).to_csv(index=False).encode(),
+            file_name=f"{company_name.replace(' ','_')}_cgri.csv",
+            mime="text/csv",
+        )
+        export_json = {k: v for k, v in result.items() if not isinstance(v, dict)}
+        export_json.update({"rev_shares": result["rev_shares"],
+                            "sup_shares": result["sup_shares"],
+                            "fac_sup_shares": result["fac_sup_shares"]})
+        e2.download_button(
+            "⬇ JSON (full detail)",
+            data=json.dumps(export_json, indent=2, default=str),
+            file_name=f"{company_name.replace(' ','_')}_cgri.json",
+            mime="application/json",
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
