@@ -422,16 +422,42 @@ def comp_card(label: str, value: str, detail: str = ""):
     )
 
 
-def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
-    dims = ["HQ Risk", "Revenue Exposure", "Supply Chain"]
-    # 25-colour palette — Alphabet (26) covers all benchmark companies
+def radar_chart(rows: list[dict], title: str = "", expanded: bool = False) -> go.Figure:
+    if expanded:
+        # All subcomponents, each normalised to 0–10 for a common scale.
+        # Multipliers (0.75–1.25) are rescaled: (val - 0.75) / (1.25 - 0.75) * 10
+        dims = [
+            "HQ Risk",
+            "Revenue Exposure",
+            "Sup. Domiciles",
+            "Sup. Facilities",
+            "Financial Mult.",
+            "Sector Mult.",
+        ]
+        def _norm_mult(v):
+            return max(0.0, min(10.0, (float(v) - 0.75) / (1.25 - 0.75) * 10))
+
+        def _make_vals(row):
+            return [
+                row.get("HQ Risk", 0),
+                row.get("Revenue Exposure", 0),
+                row.get("Sup. Domiciles", row.get("Supply Chain", 0)),
+                row.get("Sup. Facilities", row.get("Supply Chain", 0)),
+                _norm_mult(row.get("Financial Mult.", 1.0)),
+                _norm_mult(row.get("Sector Mult.", 1.0)),
+            ]
+    else:
+        dims = ["HQ Risk", "Revenue Exposure", "Supply Chain"]
+        def _make_vals(row):
+            return [row.get(d, 0) for d in dims]
+
     pal  = px.colors.qualitative.Alphabet
     n    = len(rows)
-    many = n > 6   # switch to lines-only when crowded
+    many = n > 6
 
     fig = go.Figure()
     for i, row in enumerate(rows):
-        vals = [row[d] for d in dims]
+        vals = _make_vals(row)
         col  = pal[i % len(pal)]
         fig.add_trace(go.Scatterpolar(
             r=vals + [vals[0]], theta=dims + [dims[0]],
@@ -442,7 +468,6 @@ def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
             opacity=0.15 if not many else 1.0,
         ))
 
-    # Legend: right-side vertical for many companies, horizontal below for few
     if many:
         legend_cfg = dict(orientation="v", yanchor="top", y=1.0,
                           xanchor="left", x=1.02, font=dict(size=11))
@@ -452,10 +477,13 @@ def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
                           xanchor="center", x=0.5, font=dict(size=12))
         r_margin = 30
 
+    axis_range = [0, 10]
+    tick_note  = "<br><span style='font-size:10px;color:#8a94a6'>Multipliers rescaled 0–10</span>" if expanded else ""
+
     fig.update_layout(
         polar=dict(
             bgcolor="#f7f8fc",
-            radialaxis=dict(visible=True, range=[0, 10],
+            radialaxis=dict(visible=True, range=axis_range,
                             tickfont=dict(size=10), gridcolor="#dde1ee"),
             angularaxis=dict(gridcolor="#dde1ee"),
         ),
@@ -463,9 +491,9 @@ def radar_chart(rows: list[dict], title: str = "") -> go.Figure:
         plot_bgcolor="rgba(0,0,0,0)",
         showlegend=True,
         legend=legend_cfg,
-        title=dict(text=title, font=dict(size=14, color="#1a1d2e"), x=0.5, xanchor="center"),
-        height=500 if many else 400,
-        margin=dict(l=30, r=r_margin, t=50, b=80 if not many else 20),
+        title=dict(text=title + tick_note, font=dict(size=14, color="#1a1d2e"), x=0.5, xanchor="center"),
+        height=520 if expanded else (500 if many else 400),
+        margin=dict(l=30, r=r_margin, t=60, b=80 if not many else 20),
     )
     return fig
 
@@ -667,16 +695,20 @@ if page == "📊 Benchmark Dashboard":
 
     # ── Radar ─────────────────────────────────────────────────────────────────
     st.markdown("#### Risk dimension comparison")
-    sel_cos = st.multiselect(
+    rc1, rc2 = st.columns([3, 1])
+    sel_cos = rc1.multiselect(
         "Select companies to compare (all 25 supported)",
         options=view["Company"].tolist(),
         default=view["Company"].tolist()[:3],
     )
+    expanded_radar = rc2.toggle("Expanded view", value=False,
+                                help="Adds Financial & Sector multipliers (rescaled to 0–10 for display)")
     if sel_cos:
-        radar_rows = (
-            view[view["Company"].isin(sel_cos)][["Company"] + COMPONENT_KEYS].to_dict("records")
-        )
-        st.plotly_chart(radar_chart(radar_rows), use_container_width=True)
+        radar_cols = ["Company"] + COMPONENT_KEYS + (["Financial Multiplier", "Sector Multiplier"] if expanded_radar else [])
+        radar_rows = view[view["Company"].isin(sel_cos)][radar_cols].rename(
+            columns={"Financial Multiplier": "Financial Mult.", "Sector Multiplier": "Sector Mult."}
+        ).to_dict("records")
+        st.plotly_chart(radar_chart(radar_rows, expanded=expanded_radar), use_container_width=True)
 
     # ── Stacked ───────────────────────────────────────────────────────────────
     st.markdown("#### Weighted component breakdown")
@@ -860,21 +892,35 @@ elif page == "🧮 Custom Calculator":
 
             with rdr_col:
                 st.markdown("#### Risk profile (spider chart)")
+                expanded_custom = st.toggle(
+                    "Expanded view",
+                    value=False,
+                    help="Splits Supply Chain into Supplier Domiciles & Facilities, adds multipliers (rescaled 0–10)",
+                    key="expanded_custom_radar",
+                )
                 custom_radar = {
                     "Company":          company_name,
                     "HQ Risk":          result["hq_risk"],
                     "Revenue Exposure": result["revenue_exposure"],
                     "Supply Chain":     result["supply_chain"],
+                    "Sup. Domiciles":   result["sc_sup_component"],
+                    "Sup. Facilities":  result["sc_fac_component"],
+                    "Financial Mult.":  result["financial_multiplier"],
+                    "Sector Mult.":     result["sector_multiplier"],
                 }
-                # overlay benchmark average
                 bench_avg = {
-                    "Company": "Benchmark avg",
+                    "Company":          "Benchmark avg",
                     "HQ Risk":          bench_df["HQ Risk"].mean(),
                     "Revenue Exposure": bench_df["Revenue Exposure"].mean(),
                     "Supply Chain":     bench_df["Supply Chain"].mean(),
+                    "Sup. Domiciles":   bench_df["Supply Chain"].mean(),
+                    "Sup. Facilities":  bench_df["Supply Chain"].mean(),
+                    "Financial Mult.":  bench_df["Financial Multiplier"].mean(),
+                    "Sector Mult.":     bench_df["Sector Multiplier"].mean(),
                 }
                 st.plotly_chart(
-                    radar_chart([custom_radar, bench_avg], "vs. benchmark average"),
+                    radar_chart([custom_radar, bench_avg], "vs. benchmark average",
+                                expanded=expanded_custom),
                     use_container_width=True,
                 )
 
