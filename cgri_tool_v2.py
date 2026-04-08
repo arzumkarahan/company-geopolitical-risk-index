@@ -434,7 +434,10 @@ def radar_chart(rows: list[dict], title: str = "", expanded: bool = False) -> go
             "Financial Mult.",
             "Sector Mult.",
         ]
-        def _norm_mult(v):
+        def _norm_fin(v):
+            return max(0.0, min(10.0, (float(v) - 0.8) / (1.2 - 0.8) * 10))
+
+        def _norm_sec(v):
             return max(0.0, min(10.0, (float(v) - 0.75) / (1.25 - 0.75) * 10))
 
         def _make_vals(row):
@@ -443,8 +446,8 @@ def radar_chart(rows: list[dict], title: str = "", expanded: bool = False) -> go
                 row.get("Revenue Exposure", 0),
                 row.get("Sup. Domiciles", row.get("Supply Chain", 0)),
                 row.get("Sup. Facilities", row.get("Supply Chain", 0)),
-                _norm_mult(row.get("Financial Mult.", 1.0)),
-                _norm_mult(row.get("Sector Mult.", 1.0)),
+                _norm_fin(row.get("Financial Mult.", 1.0)),
+                _norm_sec(row.get("Sector Mult.", 1.0)),
             ]
     else:
         dims = ["HQ Risk", "Revenue Exposure", "Supply Chain"]
