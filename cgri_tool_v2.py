@@ -5,8 +5,8 @@ Methodology strictly follows the Excel template in data/processed/.
 
 Formula
 -------
-CGRI = (0.15 × HQ_Risk
-       + 0.45 × Revenue_Exposure
+CGRI = (0.20 × HQ_Risk
+       + 0.40 × Revenue_Exposure
        + 0.40 × SupplyChain_Exposure)
        × Sector_Multiplier
        × Volatility_Multiplier
@@ -258,7 +258,7 @@ def compute_cgri(
     fin_mult = net_debt_to_financial_multiplier(net_debt_ebitda)
     sec_m    = float(sector_mult_lookup[sector])
 
-    base  = 0.15*hq_risk + 0.45*rev["final"] + 0.40*sc["final"]
+    base  = 0.20*hq_risk + 0.40*rev["final"] + 0.40*sc["final"]
     final = base * sec_m * volatility_mult * fin_mult
 
     return {
@@ -716,8 +716,8 @@ if page == "📊 Benchmark Dashboard":
     # ── Stacked ───────────────────────────────────────────────────────────────
     st.markdown("#### Weighted component breakdown")
     cb = view.copy()
-    cb["HQ Risk (w)"]     = 0.15 * cb["HQ Risk"]
-    cb["Revenue (w)"]     = 0.45 * cb["Revenue Exposure"]
+    cb["HQ Risk (w)"]     = 0.20 * cb["HQ Risk"]
+    cb["Revenue (w)"]     = 0.40 * cb["Revenue Exposure"]
     cb["Supply Chain (w)"] = 0.40 * cb["Supply Chain"]
     melted = cb[["Company", "HQ Risk (w)", "Revenue (w)", "Supply Chain (w)"]].melt(
         id_vars="Company", var_name="Component", value_name="Score")
@@ -1034,8 +1034,8 @@ elif page == "ℹ Methodology":
 
 $$
 \text{CGRI} = \bigl(
-  0.15 \cdot \text{HQ Risk}
-+ 0.45 \cdot \text{Revenue Exposure}
+  0.20 \cdot \text{HQ Risk}
++ 0.40 \cdot \text{Revenue Exposure}
 + 0.40 \cdot \text{Supply Chain Exposure}
 \bigr)
 \times \text{Sector Multiplier} \times \text{Volatility Multiplier} \times \text{Financial Leverage Multiplier}
@@ -1049,8 +1049,8 @@ $$
 
 | Component | Weight | Formula |
 |---|---|---|
-| **HQ Risk** | 15 % | Country GRI of the headquarters location |
-| **Revenue Exposure** | 45 % | Σ(GRI_c × rev_share_c) × HHI_sub |
+| **HQ Risk** | 20 % | Country GRI of the headquarters location |
+| **Revenue Exposure** | 40 % | Σ(GRI_c × rev_share_c) × HHI_sub |
 | **Supply Chain** | 40 % | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
 | **Sector Multiplier** | × | S&P Global Industry Risk Assessment |
 | **Volatility Multiplier** | × | 1 + Δ% vs. long-run VIX average |
