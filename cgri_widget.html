@@ -66,17 +66,37 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .form-group input:focus,.form-group select:focus{outline:2px solid #E8601A;border-color:#E8601A}
 .lev-hint{font-size:0.75rem;color:#E8601A;font-weight:600;margin-top:4px}
 
-/* ── Exposure tables ── */
-.exposure-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.exp-table-wrap{overflow:auto}
-.exp-table{width:100%;border-collapse:collapse;font-size:0.82rem}
-.exp-table th{background:#f0f0f0;padding:7px 8px;text-align:left;font-weight:700;color:#555;font-size:0.72rem;text-transform:uppercase}
-.exp-table td{padding:5px 6px;border-bottom:1px solid #f0f0f0}
-.exp-table select,.exp-table input{width:100%;padding:5px 6px;border:1px solid #ddd;border-radius:4px;font-size:0.8rem}
-.btn-add{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f0f0f0;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;color:#555;margin-top:8px}
-.btn-add:hover{background:#ffe8dd;border-color:#E8601A;color:#E8601A}
-.btn-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:1rem;padding:2px 6px}
-.btn-del:hover{color:#e74c3c}
+/* ── Exposure panels ── */
+.exposure-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.exp-panel{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:14px}
+.exp-panel-head{font-size:0.82rem;font-weight:700;color:#1a1a1a;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.exp-panel-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:#E8601A;color:#fff;border-radius:50%;font-size:0.7rem;font-weight:700;flex-shrink:0}
+.exp-col-labels{display:grid;grid-template-columns:1fr 80px 58px 52px 28px;gap:6px;padding:0 6px 4px;border-bottom:1px solid #ddd;margin-bottom:6px}
+.exp-col-labels span{font-size:0.65rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.04em}
+.exp-rows{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.exp-row{display:grid;grid-template-columns:1fr 80px 58px 52px 28px;gap:6px;align-items:center;background:#fff;border:1px solid #eee;border-radius:7px;padding:6px;transition:border-color .15s}
+.exp-row:hover{border-color:#E8601A55;background:#fffaf8}
+.exp-row select{padding:5px 6px;border:1px solid #ddd;border-radius:5px;font-size:0.78rem;background:#fff;width:100%;min-width:0}
+.exp-row select:focus{outline:2px solid #E8601A;border-color:#E8601A}
+.exp-row input[type=number]{padding:5px 6px;border:1px solid #ddd;border-radius:5px;font-size:0.78rem;text-align:right;width:100%}
+.exp-row input:focus{outline:2px solid #E8601A;border-color:#E8601A}
+.share-pill{font-size:0.72rem;font-weight:700;padding:2px 6px;border-radius:10px;text-align:center;background:#E8601A;color:#fff;white-space:nowrap}
+.share-pill.empty{background:#eee;color:#aaa}
+.gri-tag{font-size:0.68rem;color:#888;text-align:center;white-space:nowrap}
+.btn-del-row{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.9rem;padding:2px;display:flex;align-items:center;justify-content:center}
+.btn-del-row:hover{color:#e74c3c}
+.btn-add{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#fff;border:1px dashed #ddd;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600;color:#888;transition:all .15s}
+.btn-add:hover{background:#fff3ee;border-color:#E8601A;color:#E8601A}
+
+/* ── Radar toggle ── */
+.radar-toggle-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.tog-switch{position:relative;width:34px;height:18px;flex-shrink:0}
+.tog-switch input{opacity:0;width:0;height:0;position:absolute}
+.tog-slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:18px;transition:.2s}
+.tog-slider::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tog-switch input:checked+.tog-slider{background:#E8601A}
+.tog-switch input:checked+.tog-slider::before{transform:translateX(16px)}
+.tog-label{font-size:0.76rem;color:#555;font-weight:600}
 .btn-compute{display:block;width:100%;padding:14px;background:#E8601A;color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:0.04em;margin-top:8px;transition:background .2s}
 .btn-compute:hover{background:#c44e10}
 
@@ -97,20 +117,32 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .comp-card .cd{font-size:0.7rem;color:#bbb;margin-top:2px}
 
 /* ── Methodology ── */
-.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.method-box{background:#fff;border-radius:10px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
-.method-box h3{font-size:0.95rem;font-weight:700;color:#E8601A;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #eee}
-.method-box p,.method-box li{font-size:0.85rem;color:#444;line-height:1.6}
-.method-box ul{padding-left:18px}
-.formula-box{background:#1a1a1a;border-radius:8px;padding:16px;margin-bottom:16px;font-family:monospace;font-size:0.82rem;color:#f0f0f0;line-height:1.8;overflow-x:auto}
-.formula-box span{color:#E8601A}
-.mtable{width:100%;border-collapse:collapse;font-size:0.82rem;margin-top:10px}
-.mtable th{background:#f5f5f5;padding:7px 10px;text-align:left;font-weight:700;color:#555;border-bottom:2px solid #eee}
-.mtable td{padding:7px 10px;border-bottom:1px solid #eee;color:#444}
+.method-intro{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px;font-size:0.85rem;color:#555;line-height:1.7;border-left:4px solid #E8601A}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.method-box{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+.method-box h3{font-size:0.88rem;font-weight:700;color:#E8601A;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #fde8d5;display:flex;align-items:center;gap:6px}
+.method-box p,.method-box li{font-size:0.83rem;color:#444;line-height:1.65}
+.method-box ul{padding-left:18px;margin-top:6px}
+.method-box ul li{margin-bottom:4px}
+.formula-box{background:#1e1e2e;border-radius:10px;padding:20px 22px;margin-bottom:20px;font-family:'Courier New',monospace;font-size:0.83rem;color:#cdd6f4;line-height:2;overflow-x:auto;border:1px solid #313244}
+.formula-box span{color:#fab387;font-weight:700}
+.formula-box .f-label{color:#89b4fa}
+.mtable{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:8px}
+.mtable thead tr{background:#fdf2ee}
+.mtable th{padding:8px 10px;text-align:left;font-weight:700;color:#E8601A;border-bottom:2px solid #fad7c5;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.03em}
+.mtable td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:#333;font-size:0.82rem}
+.mtable tr:hover td{background:#fffaf8}
 .mtable tr:last-child td{border-bottom:none}
+.mtable td b{color:#E8601A}
+.weight-badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#fde8d5;color:#E8601A;font-weight:700;font-size:0.78rem}
+.source-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.source-item{display:flex;gap:10px;align-items:flex-start;padding:10px;background:#fafafa;border-radius:7px;border:1px solid #eee}
+.source-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+.source-text{font-size:0.82rem;color:#444;line-height:1.5}
+.source-text b{color:#1a1a1a}
 
 /* ── Radar select ── */
-.radar-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.radar-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
 .radar-controls label{font-size:0.78rem;font-weight:700;color:#555}
 .radar-controls select{padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:0.8rem}
 
@@ -128,11 +160,19 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
   .comp-cards{grid-template-columns:1fr 1fr}
   .method-grid{grid-template-columns:1fr}
   .cgri-tab{font-size:0.75rem;padding:10px 6px}
+  .exp-col-labels{grid-template-columns:1fr 70px 50px 0 28px}
+  .exp-col-labels span:nth-child(4){display:none}
+  .exp-row{grid-template-columns:1fr 70px 50px 0 28px}
+  .exp-row .gri-tag{display:none}
 }
 @media(max-width:480px){
   .kpi-row{grid-template-columns:1fr}
   .profile-grid{grid-template-columns:1fr}
   .comp-cards{grid-template-columns:1fr}
+  .exp-col-labels{grid-template-columns:1fr 65px 46px}
+  .exp-col-labels span:nth-child(4),.exp-col-labels span:nth-child(5){display:none}
+  .exp-row{grid-template-columns:1fr 65px 46px}
+  .exp-row .gri-tag,.exp-row .btn-del-row{display:none}
 }
 </style>
 </head>
@@ -177,6 +217,13 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
         <div class="radar-controls">
           <label>Companies:</label>
           <select id="radar-select" multiple size="4" style="height:80px;min-width:180px" onchange="updateRadar()"></select>
+        </div>
+        <div class="radar-toggle-row">
+          <label class="tog-switch">
+            <input type="checkbox" id="radar-expanded" onchange="updateRadar()"/>
+            <span class="tog-slider"></span>
+          </label>
+          <span class="tog-label">Expanded view (+ Financial &amp; Sector multipliers)</span>
         </div>
         <canvas id="radarChart"></canvas>
       </div>
@@ -237,35 +284,23 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
       <h3>Step 2 — Geographic Exposure</h3>
       <p style="font-size:0.82rem;color:#666;margin-bottom:16px">Enter any unit (%, USD mn, count). Weights are auto-normalised to 100%. Rows with zero or blank country are ignored.</p>
       <div class="exposure-grid">
-        <div>
-          <strong style="font-size:0.85rem">1 · Revenue by Country</strong>
-          <div class="exp-table-wrap" style="margin-top:8px">
-            <table class="exp-table">
-              <thead><tr><th>Country</th><th>Weight</th><th>Share</th><th></th></tr></thead>
-              <tbody id="rev-rows"></tbody>
-            </table>
-            <button class="btn-add" onclick="addRow('rev')">+ Add country</button>
-          </div>
+        <div class="exp-panel">
+          <div class="exp-panel-head"><span class="exp-panel-num">1</span>Revenue by Country</div>
+          <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
+          <div id="rev-rows" class="exp-rows"></div>
+          <button class="btn-add" onclick="addRow('rev')">+ Add country</button>
         </div>
-        <div>
-          <strong style="font-size:0.85rem">2 · Supplier Distribution</strong>
-          <div class="exp-table-wrap" style="margin-top:8px">
-            <table class="exp-table">
-              <thead><tr><th>Country</th><th>Weight</th><th>Share</th><th></th></tr></thead>
-              <tbody id="sup-rows"></tbody>
-            </table>
-            <button class="btn-add" onclick="addRow('sup')">+ Add country</button>
-          </div>
+        <div class="exp-panel">
+          <div class="exp-panel-head"><span class="exp-panel-num">2</span>Supplier Domiciles</div>
+          <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
+          <div id="sup-rows" class="exp-rows"></div>
+          <button class="btn-add" onclick="addRow('sup')">+ Add country</button>
         </div>
-        <div>
-          <strong style="font-size:0.85rem">3 · Supplier Facility Distribution</strong>
-          <div class="exp-table-wrap" style="margin-top:8px">
-            <table class="exp-table">
-              <thead><tr><th>Country</th><th>Weight</th><th>Share</th><th></th></tr></thead>
-              <tbody id="supfac-rows"></tbody>
-            </table>
-            <button class="btn-add" onclick="addRow('supfac')">+ Add country</button>
-          </div>
+        <div class="exp-panel">
+          <div class="exp-panel-head"><span class="exp-panel-num">3</span>Supplier Facility Domiciles</div>
+          <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
+          <div id="supfac-rows" class="exp-rows"></div>
+          <button class="btn-add" onclick="addRow('supfac')">+ Add country</button>
         </div>
       </div>
     </div>
@@ -297,64 +332,76 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
   <!-- ═══════════════════════════════════════════════════════ METHODOLOGY -->
   <div id="tab-methodology" class="cgri-page">
 
+    <div class="method-intro">
+      The <b>Company Geopolitical Risk Index (CGRI)</b> quantifies a firm's exposure to geopolitical risk across its headquarters location, revenue geography, and supply chain footprint. Three core components are combined with sector, volatility, and financial leverage adjustments.
+    </div>
+
     <div class="formula-box">
-      CGRI = ( <span>0.20</span> × HQ_Risk + <span>0.40</span> × Revenue_Exposure + <span>0.40</span> × Supply_Chain_Exposure )<br>
-             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× Sector_Multiplier × Volatility_Multiplier × Financial_Leverage_Multiplier
+      <span class="f-label">CGRI</span> = ( <span>0.20</span> × HQ_Risk &nbsp;+&nbsp; <span>0.40</span> × Revenue_Exposure &nbsp;+&nbsp; <span>0.40</span> × Supply_Chain )<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× <span>Sector_Multiplier</span> &nbsp;×&nbsp; <span>Volatility_Multiplier</span> &nbsp;×&nbsp; <span>Financial_Leverage_Multiplier</span>
     </div>
 
     <div class="method-grid">
       <div class="method-box">
-        <h3>Main Components</h3>
+        <h3>📐 Main Components</h3>
         <table class="mtable">
-          <tr><th>Component</th><th>Weight</th><th>Formula</th></tr>
-          <tr><td><b>HQ Risk</b></td><td>20%</td><td>Country GRI of headquarters</td></tr>
-          <tr><td><b>Revenue Exposure</b></td><td>40%</td><td>Σ(GRI_c × rev_share_c) × HHI_sub</td></tr>
-          <tr><td><b>Supply Chain</b></td><td>40%</td><td>(0.5×C_suppliers + 0.5×C_facilities) × HHI_sub</td></tr>
+          <thead><tr><th>Component</th><th>Weight</th><th>Formula</th></tr></thead>
+          <tbody>
+            <tr><td><b>HQ Country Risk</b></td><td><span class="weight-badge">20%</span></td><td>GRI score of headquarters country</td></tr>
+            <tr><td><b>Revenue Exposure</b></td><td><span class="weight-badge">40%</span></td><td>Σ(GRI_c × rev_share_c) × HHI_sub</td></tr>
+            <tr><td><b>Supply Chain</b></td><td><span class="weight-badge">40%</span></td><td>(0.5 × Supplier_GRI + 0.5 × Facility_GRI) × HHI_sub</td></tr>
+          </tbody>
         </table>
       </div>
       <div class="method-box">
-        <h3>HHI Concentration Submultiplier</h3>
+        <h3>🔗 HHI Concentration Submultiplier</h3>
+        <p style="margin-bottom:8px">The Herfindahl–Hirschman Index adjusts for geographic concentration of revenue or supply chain.</p>
         <table class="mtable">
-          <tr><th>HHI</th><th>Submultiplier</th><th>Interpretation</th></tr>
-          <tr><td>&lt; 0.15</td><td><b>0.90</b></td><td>Highly diversified</td></tr>
-          <tr><td>0.15 – 0.25</td><td><b>1.00</b></td><td>Moderate</td></tr>
-          <tr><td>0.25 – 0.40</td><td><b>1.10</b></td><td>Somewhat concentrated</td></tr>
-          <tr><td>0.40 – 0.60</td><td><b>1.25</b></td><td>Concentrated</td></tr>
-          <tr><td>≥ 0.60</td><td><b>1.50</b></td><td>Highly concentrated</td></tr>
+          <thead><tr><th>HHI Range</th><th>Multiplier</th><th>Interpretation</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 0.15</td><td><b>0.90</b></td><td>Highly diversified</td></tr>
+            <tr><td>0.15 – 0.25</td><td><b>1.00</b></td><td>Moderate</td></tr>
+            <tr><td>0.25 – 0.40</td><td><b>1.10</b></td><td>Somewhat concentrated</td></tr>
+            <tr><td>0.40 – 0.60</td><td><b>1.25</b></td><td>Concentrated</td></tr>
+            <tr><td>≥ 0.60</td><td><b>1.50</b></td><td>Highly concentrated</td></tr>
+          </tbody>
         </table>
       </div>
       <div class="method-box">
-        <h3>Financial Leverage Multiplier</h3>
+        <h3>💳 Financial Leverage Multiplier</h3>
+        <p style="margin-bottom:8px">Net Debt / EBITDA ratio adjusts the base score to reflect financial resilience.</p>
         <table class="mtable">
-          <tr><th>Net Debt / EBITDA</th><th>Multiplier</th></tr>
-          <tr><td>&lt; 0 (net cash)</td><td><b>0.8</b></td></tr>
-          <tr><td>0 – &lt; 2</td><td><b>0.9</b></td></tr>
-          <tr><td>2 – &lt; 4</td><td><b>1.0</b></td></tr>
-          <tr><td>4 – &lt; 6</td><td><b>1.1</b></td></tr>
-          <tr><td>≥ 6</td><td><b>1.2</b></td></tr>
+          <thead><tr><th>Net Debt / EBITDA</th><th>Multiplier</th><th>Rationale</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 0 (net cash)</td><td><b>0.8</b></td><td>Very low financial risk</td></tr>
+            <tr><td>0 – &lt; 2</td><td><b>0.9</b></td><td>Low leverage</td></tr>
+            <tr><td>2 – &lt; 4</td><td><b>1.0</b></td><td>Moderate leverage</td></tr>
+            <tr><td>4 – &lt; 6</td><td><b>1.1</b></td><td>High leverage</td></tr>
+            <tr><td>≥ 6</td><td><b>1.2</b></td><td>Very high leverage</td></tr>
+          </tbody>
         </table>
       </div>
       <div class="method-box">
-        <h3>Risk Categories</h3>
-        <table class="mtable">
-          <tr><th>Score</th><th>Category</th></tr>
-          <tr><td>&lt; 3.5</td><td><span style="color:#27ae60;font-weight:700">● Low</span></td></tr>
-          <tr><td>3.5 – 5.0</td><td><span style="color:#f39c12;font-weight:700">● Moderate</span></td></tr>
-          <tr><td>5.0 – 6.5</td><td><span style="color:#e67e22;font-weight:700">● High</span></td></tr>
-          <tr><td>≥ 6.5</td><td><span style="color:#e74c3c;font-weight:700">● Very High</span></td></tr>
+        <h3>🏷️ Risk Categories &amp; Sector Multiplier</h3>
+        <table class="mtable" style="margin-bottom:14px">
+          <thead><tr><th>CGRI Score</th><th>Category</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; 3.5</td><td><span style="color:#27ae60;font-weight:700">● Low</span></td></tr>
+            <tr><td>3.5 – 5.0</td><td><span style="color:#f39c12;font-weight:700">● Moderate</span></td></tr>
+            <tr><td>5.0 – 6.5</td><td><span style="color:#e67e22;font-weight:700">● High</span></td></tr>
+            <tr><td>≥ 6.5</td><td><span style="color:#e74c3c;font-weight:700">● Very High</span></td></tr>
+          </tbody>
         </table>
-        <br>
-        <h3>Sector Multiplier</h3>
-        <p>Derived from S&amp;P Global Industry Risk Assessment. Six risk categories ranging from <b>0.75</b> (Very low risk) to <b>1.25</b> (Very high risk).</p>
+        <p><b>Sector Multiplier</b> — Derived from S&amp;P Global Industry Risk Assessment. Ranges from <b style="color:#27ae60">0.75</b> (very low risk sectors, e.g. regulated utilities) to <b style="color:#e67e22">1.25</b> (very high risk sectors).</p>
       </div>
       <div class="method-box" style="grid-column:1/-1">
-        <h3>Data Sources</h3>
-        <ul>
-          <li><b>Country GRI scores</b> — 147 countries · geopriskindex.com · 2024</li>
-          <li><b>Sector multipliers</b> — S&amp;P Global Industry Risk Assessment</li>
-          <li><b>Volatility multiplier</b> — CBOE VIX annual average (FRED) · 2024 = <b>0.9348</b></li>
-          <li><b>Benchmark scores</b> — 25 global companies · Bloomberg data · 2024</li>
-        </ul>
+        <h3>📚 Data Sources</h3>
+        <div class="source-list">
+          <div class="source-item"><span class="source-icon">🌍</span><div class="source-text"><b>Country GRI Scores</b> — 147 countries · geopriskindex.com · 2024 edition</div></div>
+          <div class="source-item"><span class="source-icon">🏭</span><div class="source-text"><b>Sector Multipliers</b> — S&amp;P Global Industry Risk Assessment · 54 industry sectors across 6 risk tiers</div></div>
+          <div class="source-item"><span class="source-icon">📈</span><div class="source-text"><b>Volatility Multiplier</b> — CBOE VIX annual average (FRED) · 2024 average = <b>0.9348</b></div></div>
+          <div class="source-item"><span class="source-icon">🏢</span><div class="source-text"><b>Benchmark Company Data</b> — 25 global companies · Bloomberg financial data · 2024 fiscal year</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -509,14 +556,33 @@ function renderDashboard(){
 function updateRadar(){
   const selected=[...document.getElementById('radar-select').selectedOptions].map(o=>o.value);
   const rows=filteredData.filter(d=>selected.includes(d.company));
-  const dims=['HQ Risk','Revenue Exposure','Supply Chain'];
-  const datasets=rows.map((d,i)=>({
-    label:d.company,
-    data:[d.hq_risk,d.revenue,d.supply_chain],
-    borderColor:PALETTE[i%PALETTE.length],
-    backgroundColor:PALETTE[i%PALETTE.length]+'33',
-    borderWidth:2,pointRadius:3,
-  }));
+  const expanded=document.getElementById('radar-expanded').checked;
+  let dims,datasets;
+  if(expanded){
+    dims=['HQ Risk','Revenue Exposure','Supply Chain','Fin. Leverage','Sector Risk'];
+    datasets=rows.map((d,i)=>({
+      label:d.company,
+      data:[
+        d.hq_risk,
+        d.revenue,
+        d.supply_chain,
+        (d.fin_mult-0.8)/(1.2-0.8)*10,
+        (d.sec_mult-0.75)/(1.25-0.75)*10,
+      ],
+      borderColor:PALETTE[i%PALETTE.length],
+      backgroundColor:PALETTE[i%PALETTE.length]+'33',
+      borderWidth:2,pointRadius:3,
+    }));
+  } else {
+    dims=['HQ Risk','Revenue Exposure','Supply Chain'];
+    datasets=rows.map((d,i)=>({
+      label:d.company,
+      data:[d.hq_risk,d.revenue,d.supply_chain],
+      borderColor:PALETTE[i%PALETTE.length],
+      backgroundColor:PALETTE[i%PALETTE.length]+'33',
+      borderWidth:2,pointRadius:3,
+    }));
+  }
   if(radarChart)radarChart.destroy();
   radarChart=new Chart(document.getElementById('radarChart'),{
     type:'radar',
@@ -531,40 +597,51 @@ function updateRadar(){
 const countryOpts=Object.keys(DATA.countries).sort().map(c=>`<option value="${c}">${c}</option>`).join('');
 
 function addRow(key, country='', weight=0){
-  const tbody=document.getElementById(key+'-rows');
+  const container=document.getElementById(key+'-rows');
   const id=Date.now()+Math.random();
-  const tr=document.createElement('tr');
-  tr.dataset.id=id;
-  tr.innerHTML=`
-    <td><select onchange="updateShares('${key}')">${'<option value="">— select —</option>'+countryOpts}</select></td>
-    <td><input type="number" min="0" step="1" value="${weight}" style="width:70px" oninput="updateShares('${key}')"/></td>
-    <td class="share-cell" style="color:#888;font-size:0.78rem;text-align:center">—</td>
-    <td><button class="btn-del" onclick="delRow('${key}','${id}')">✕</button></td>`;
-  if(country){tr.querySelector('select').value=country;}
-  tbody.appendChild(tr);
+  const div=document.createElement('div');
+  div.className='exp-row';
+  div.dataset.id=id;
+  div.innerHTML=`
+    <select onchange="updateShares('${key}')"><option value="">— select country —</option>${countryOpts}</select>
+    <input type="number" min="0" step="1" value="${weight}" oninput="updateShares('${key}')"/>
+    <span class="share-pill empty">—</span>
+    <span class="gri-tag">—</span>
+    <button class="btn-del-row" onclick="delRow('${key}','${id}')">✕</button>`;
+  if(country){div.querySelector('select').value=country;}
+  container.appendChild(div);
   updateShares(key);
 }
 
 function delRow(key, id){
-  const tbody=document.getElementById(key+'-rows');
-  const row=tbody.querySelector(`tr[data-id="${id}"]`);
-  if(row)tbody.removeChild(row);
+  const container=document.getElementById(key+'-rows');
+  const row=container.querySelector(`[data-id="${id}"]`);
+  if(row)container.removeChild(row);
   updateShares(key);
 }
 
 function updateShares(key){
-  const rows=[...document.getElementById(key+'-rows').querySelectorAll('tr')];
+  const rows=[...document.getElementById(key+'-rows').querySelectorAll('.exp-row')];
   const vals=rows.map(r=>({c:r.querySelector('select').value,w:parseFloat(r.querySelector('input').value)||0})).filter(r=>r.c&&r.w>0);
   const total=vals.reduce((s,r)=>s+r.w,0);
   rows.forEach(r=>{
     const c=r.querySelector('select').value, w=parseFloat(r.querySelector('input').value)||0;
-    const cell=r.querySelector('.share-cell');
-    cell.textContent=c&&w>0&&total>0?`${(w/total*100).toFixed(1)}%`:'—';
+    const pill=r.querySelector('.share-pill');
+    const gri=r.querySelector('.gri-tag');
+    if(c&&w>0&&total>0){
+      pill.textContent=`${(w/total*100).toFixed(1)}%`;
+      pill.classList.remove('empty');
+      gri.textContent=DATA.countries[c]?DATA.countries[c].toFixed(2):'—';
+    } else {
+      pill.textContent='—';
+      pill.classList.add('empty');
+      gri.textContent='—';
+    }
   });
 }
 
 function getExposure(key){
-  const rows=[...document.getElementById(key+'-rows').querySelectorAll('tr')];
+  const rows=[...document.getElementById(key+'-rows').querySelectorAll('.exp-row')];
   const out={};
   rows.forEach(r=>{
     const c=r.querySelector('select').value, w=parseFloat(r.querySelector('input').value)||0;
