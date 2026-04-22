@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Company Geopolitical Risk Index</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Chart.js loaded dynamically in script below -->
 <style>
 /* ── Reset & base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -679,9 +679,9 @@ function computeCGRI(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// INIT
+// INIT — dynamically load Chart.js then boot (works inside Elementor)
 // ═══════════════════════════════════════════════════════════════════════════
-(function init(){
+function _cgriInit(){
   // Populate country dropdown
   const cSel=document.getElementById('c-country');
   cSel.innerHTML='<option value="">— select —</option>'+countryOpts;
@@ -698,6 +698,17 @@ function computeCGRI(){
   buildSectorFilter();
   filteredData=[...DATA.benchmark].sort((a,b)=>b.cgri-a.cgri);
   renderDashboard();
+}
+
+(function(){
+  if(typeof Chart!=='undefined'){
+    _cgriInit();
+  } else {
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    s.onload=_cgriInit;
+    document.head.appendChild(s);
+  }
 })();
 </script>
 </body>
