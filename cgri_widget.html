@@ -464,17 +464,17 @@ function buildKPIs(){
   const maxB=DATA.benchmark.reduce((a,b)=>b.cgri>a.cgri?b:a);
   const minB=DATA.benchmark.reduce((a,b)=>b.cgri<a.cgri?b:a);
   const nHigh=DATA.benchmark.filter(d=>riskLabel(d.cgri)==='High'||riskLabel(d.cgri)==='Very High').length;
-  document.getElementById('kpi-row').innerHTML=`
-    <div class="kpi-card"><div class="kpi-label">Portfolio Average</div><div class="kpi-value">${avg}</div><div class="kpi-sub">mean CGRI score</div></div>
-    <div class="kpi-card" style="border-left-color:#e74c3c"><div class="kpi-label">Highest Risk</div><div class="kpi-value">${maxB.cgri.toFixed(2)}</div><div class="kpi-sub">${maxB.company}</div></div>
-    <div class="kpi-card" style="border-left-color:#27ae60"><div class="kpi-label">Lowest Risk</div><div class="kpi-value">${minB.cgri.toFixed(2)}</div><div class="kpi-sub">${minB.company}</div></div>
-    <div class="kpi-card" style="border-left-color:#e67e22"><div class="kpi-label">High / Very High</div><div class="kpi-value">${nHigh}</div><div class="kpi-sub">of ${DATA.benchmark.length} companies</div></div>`;
+  document.getElementById('kpi-row').innerHTML=
+    '<div class="kpi-card"><div class="kpi-label">Portfolio Average</div><div class="kpi-value">'+avg+'</div><div class="kpi-sub">mean CGRI score</div></div>'+
+    '<div class="kpi-card" style="border-left-color:#e74c3c"><div class="kpi-label">Highest Risk</div><div class="kpi-value">'+maxB.cgri.toFixed(2)+'</div><div class="kpi-sub">'+maxB.company+'</div></div>'+
+    '<div class="kpi-card" style="border-left-color:#27ae60"><div class="kpi-label">Lowest Risk</div><div class="kpi-value">'+minB.cgri.toFixed(2)+'</div><div class="kpi-sub">'+minB.company+'</div></div>'+
+    '<div class="kpi-card" style="border-left-color:#e67e22"><div class="kpi-label">High / Very High</div><div class="kpi-value">'+nHigh+'</div><div class="kpi-sub">of '+DATA.benchmark.length+' companies</div></div>';
 }
 
 function buildSectorFilter(){
   const sectors=[...new Set(DATA.benchmark.map(d=>d.sector))].sort();
   const sel=document.getElementById('f-sector');
-  sel.innerHTML='<option value="">All sectors</option>'+sectors.map(s=>`<option>${s}</option>`).join('');
+  sel.innerHTML='<option value="">All sectors</option>'+sectors.map(s=>'<option>'+s+'</option>').join('');
 }
 
 function applyFilters(){
@@ -509,7 +509,7 @@ function renderDashboard(){
   barChart=new Chart(document.getElementById('barChart'),{
     type:'bar',
     data:{labels,datasets:[{data:values,backgroundColor:colors,borderRadius:4}]},
-    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`CGRI: ${ctx.parsed.y.toFixed(2)} — ${riskLabel(ctx.parsed.y)}`}}},scales:{x:{ticks:{maxRotation:90,font:{size:10}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2)+' \u2014 '+riskLabel(ctx.parsed.y);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:10}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
   });
 
   // Stacked chart
@@ -530,7 +530,7 @@ function renderDashboard(){
   // Radar select
   const rsel=document.getElementById('radar-select');
   const prevSelected=[...rsel.selectedOptions].map(o=>o.value);
-  rsel.innerHTML=filteredData.map(d=>`<option value="${d.company}" ${prevSelected.includes(d.company)||prevSelected.length===0?'selected':''}>${d.company}</option>`).join('');
+  rsel.innerHTML=filteredData.map(d=>'<option value="'+d.company+'" '+(prevSelected.includes(d.company)||prevSelected.length===0?'selected':'')+'>'+d.company+'</option>').join('');
   // default: first 3
   if(prevSelected.length===0)[...rsel.options].forEach((o,i)=>o.selected=i<3);
   updateRadar();
@@ -539,17 +539,17 @@ function renderDashboard(){
   const tbody=document.getElementById('bench-tbody');
   tbody.innerHTML=filteredData.map(d=>{
     const rl=riskLabel(d.cgri);
-    return`<tr>
-      <td><b>${d.company}</b></td>
-      <td style="max-width:160px;white-space:normal;font-size:0.78rem">${d.sector}</td>
-      <td><b>${d.cgri.toFixed(2)}</b></td>
-      <td><span class="risk-badge risk-${rl.replace(' ','.')}">${rl}</span></td>
-      <td>${d.hq_risk.toFixed(2)}</td>
-      <td>${d.revenue.toFixed(2)}</td>
-      <td>${d.supply_chain.toFixed(2)}</td>
-      <td>×${d.fin_mult.toFixed(1)}</td>
-      <td>×${d.sec_mult.toFixed(2)}</td>
-    </tr>`;
+    return '<tr>'+
+      '<td><b>'+d.company+'</b></td>'+
+      '<td style="max-width:160px;white-space:normal;font-size:0.78rem">'+d.sector+'</td>'+
+      '<td><b>'+d.cgri.toFixed(2)+'</b></td>'+
+      '<td><span class="risk-badge risk-'+rl.replace(' ','.')+'">'+rl+'</span></td>'+
+      '<td>'+d.hq_risk.toFixed(2)+'</td>'+
+      '<td>'+d.revenue.toFixed(2)+'</td>'+
+      '<td>'+d.supply_chain.toFixed(2)+'</td>'+
+      '<td>\xd7'+d.fin_mult.toFixed(1)+'</td>'+
+      '<td>\xd7'+d.sec_mult.toFixed(2)+'</td>'+
+      '</tr>';
   }).join('');
 }
 
@@ -594,7 +594,7 @@ function updateRadar(){
 // ═══════════════════════════════════════════════════════════════════════════
 // CALCULATOR — row management
 // ═══════════════════════════════════════════════════════════════════════════
-const countryOpts=Object.keys(DATA.countries).sort().map(c=>`<option value="${c}">${c}</option>`).join('');
+const countryOpts=Object.keys(DATA.countries).sort().map(c=>'<option value="'+c+'">'+c+'</option>').join('');
 
 function addRow(key, country='', weight=0){
   const container=document.getElementById(key+'-rows');
@@ -602,12 +602,12 @@ function addRow(key, country='', weight=0){
   const div=document.createElement('div');
   div.className='exp-row';
   div.dataset.id=id;
-  div.innerHTML=`
-    <select onchange="updateShares('${key}')"><option value="">— select country —</option>${countryOpts}</select>
-    <input type="number" min="0" step="1" value="${weight}" oninput="updateShares('${key}')"/>
-    <span class="share-pill empty">—</span>
-    <span class="gri-tag">—</span>
-    <button class="btn-del-row" onclick="delRow('${key}','${id}')">✕</button>`;
+  div.innerHTML=
+    '<select onchange="updateShares(\''+key+'\')"><option value="">\u2014 select country \u2014</option>'+countryOpts+'</select>'+
+    '<input type="number" min="0" step="1" value="'+weight+'" oninput="updateShares(\''+key+'\')"/>'+
+    '<span class="share-pill empty">\u2014</span>'+
+    '<span class="gri-tag">\u2014</span>'+
+    '<button class="btn-del-row" onclick="delRow(\''+key+'\',\''+id+'\')">&#x2715;</button>';
   if(country){div.querySelector('select').value=country;}
   container.appendChild(div);
   updateShares(key);
@@ -615,7 +615,7 @@ function addRow(key, country='', weight=0){
 
 function delRow(key, id){
   const container=document.getElementById(key+'-rows');
-  const row=container.querySelector(`[data-id="${id}"]`);
+  const row=container.querySelector('[data-id="'+id+'"]');
   if(row)container.removeChild(row);
   updateShares(key);
 }
@@ -629,7 +629,7 @@ function updateShares(key){
     const pill=r.querySelector('.share-pill');
     const gri=r.querySelector('.gri-tag');
     if(c&&w>0&&total>0){
-      pill.textContent=`${(w/total*100).toFixed(1)}%`;
+      pill.textContent=(w/total*100).toFixed(1)+'%';
       pill.classList.remove('empty');
       gri.textContent=DATA.countries[c]?DATA.countries[c].toFixed(2):'—';
     } else {
@@ -654,7 +654,7 @@ function getExposure(key){
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('c-leverage').addEventListener('input',function(){
     const m=finMult(parseFloat(this.value)||0);
-    document.getElementById('lev-hint').textContent=`Financial multiplier: ×${m.toFixed(1)}`;
+    document.getElementById('lev-hint').textContent='Financial multiplier: \xd7'+m.toFixed(1);
   });
 });
 
@@ -681,7 +681,7 @@ function computeCGRI(){
   if(!Object.keys(revRaw).length)missing.push('Revenue by Country');
   if(!Object.keys(supRaw).length)missing.push('Supplier Distribution');
   if(!Object.keys(supfacRaw).length)missing.push('Supplier Facility Distribution');
-  if(missing.length){alertBox.innerHTML=`<div class="alert alert-warn">Please fill in: <b>${missing.join(', ')}</b></div>`;return;}
+  if(missing.length){alertBox.innerHTML='<div class="alert alert-warn">Please fill in: <b>'+missing.join(', ')+'</b></div>';return;}
 
   // Compute
   const hqRisk=DATA.countries[hqC];
@@ -705,21 +705,21 @@ function computeCGRI(){
   const rl=riskLabel(cgri);
 
   // Score card
-  document.getElementById('score-box').innerHTML=`
-    <div class="score-card ${rl.replace(' ','-')}">
-      <div class="score-co">${name}</div>
-      <div class="score-num">${cgri.toFixed(2)}</div>
-      <div class="score-cat">${rl} Risk</div>
-    </div>`;
+  document.getElementById('score-box').innerHTML=
+    '<div class="score-card '+rl.replace(' ','-')+'">'+
+      '<div class="score-co">'+name+'</div>'+
+      '<div class="score-num">'+cgri.toFixed(2)+'</div>'+
+      '<div class="score-cat">'+rl+' Risk</div>'+
+    '</div>';
 
   // Component cards
-  document.getElementById('comp-cards').innerHTML=`
-    <div class="comp-card"><div class="cl">HQ Risk</div><div class="cv">${hqRisk.toFixed(2)}</div><div class="cd">${hqC}</div></div>
-    <div class="comp-card"><div class="cl">Revenue Exposure</div><div class="cv">${revComp.toFixed(2)}</div><div class="cd">HHI sub ×${hhiSub(hhi(revShares)).toFixed(2)}</div></div>
-    <div class="comp-card"><div class="cl">Supply Chain</div><div class="cv">${scComp.toFixed(2)}</div><div class="cd">HHI sub ×${hhiSub(hhiCombined).toFixed(2)}</div></div>
-    <div class="comp-card"><div class="cl">Financial Leverage</div><div class="cv">×${fm.toFixed(1)}</div><div class="cd">Net D/EBITDA ${leverage.toFixed(2)}</div></div>
-    <div class="comp-card"><div class="cl">Sector Multiplier</div><div class="cv">×${sm.toFixed(2)}</div><div class="cd">${sector}</div></div>
-    <div class="comp-card"><div class="cl">Volatility Multiplier</div><div class="cv">×${vm.toFixed(4)}</div><div class="cd">2024 VIX avg</div></div>`;
+  document.getElementById('comp-cards').innerHTML=
+    '<div class="comp-card"><div class="cl">HQ Risk</div><div class="cv">'+hqRisk.toFixed(2)+'</div><div class="cd">'+hqC+'</div></div>'+
+    '<div class="comp-card"><div class="cl">Revenue Exposure</div><div class="cv">'+revComp.toFixed(2)+'</div><div class="cd">HHI sub \xd7'+hhiSub(hhi(revShares)).toFixed(2)+'</div></div>'+
+    '<div class="comp-card"><div class="cl">Supply Chain</div><div class="cv">'+scComp.toFixed(2)+'</div><div class="cd">HHI sub \xd7'+hhiSub(hhiCombined).toFixed(2)+'</div></div>'+
+    '<div class="comp-card"><div class="cl">Financial Leverage</div><div class="cv">\xd7'+fm.toFixed(1)+'</div><div class="cd">Net D/EBITDA '+leverage.toFixed(2)+'</div></div>'+
+    '<div class="comp-card"><div class="cl">Sector Multiplier</div><div class="cv">\xd7'+sm.toFixed(2)+'</div><div class="cd">'+sector+'</div></div>'+
+    '<div class="comp-card"><div class="cl">Volatility Multiplier</div><div class="cv">\xd7'+vm.toFixed(4)+'</div><div class="cd">2024 VIX avg</div></div>';
 
   // Radar vs benchmark avg
   const bAvgHQ=DATA.benchmark.reduce((s,d)=>s+d.hq_risk,0)/DATA.benchmark.length;
@@ -739,7 +739,7 @@ function computeCGRI(){
   });
 
   // Ranking bar
-  const allWithCustom=[...DATA.benchmark.map(d=>({company:d.company,cgri:d.cgri,custom:false})),{company:`▶ ${name}`,cgri,custom:true}]
+  const allWithCustom=[...DATA.benchmark.map(d=>({company:d.company,cgri:d.cgri,custom:false})),{company:'\u25b6 '+name,cgri:cgri,custom:true}]
     .sort((a,b)=>b.cgri-a.cgri);
   if(calcBarChart)calcBarChart.destroy();
   calcBarChart=new Chart(document.getElementById('calcBar'),{
@@ -748,7 +748,7 @@ function computeCGRI(){
       labels:allWithCustom.map(d=>d.company),
       datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#1a1a1a':riskColor(d.cgri)),borderRadius:3}]
     },
-    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`CGRI: ${ctx.parsed.y.toFixed(2)}`}}},scales:{x:{ticks:{maxRotation:90,font:{size:9}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:9}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
   });
 
   document.getElementById('calc-results').style.display='block';
@@ -765,7 +765,7 @@ function _cgriInit(){
 
   // Populate sector dropdown
   const sSel=document.getElementById('c-sector');
-  sSel.innerHTML=Object.keys(DATA.sectors).sort().map(s=>`<option value="${s}">${s}</option>`).join('');
+  sSel.innerHTML=Object.keys(DATA.sectors).sort().map(s=>'<option value="'+s+'">'+s+'</option>').join('');
 
   // Default exposure rows
   addRow('rev');addRow('sup');addRow('supfac');
