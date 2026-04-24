@@ -420,7 +420,7 @@ function riskLabel(s){
   if(s<3.5)return'Low';if(s<5)return'Moderate';if(s<6.5)return'High';return'Very High';
 }
 const RISK_COLORS={Low:'#27ae60',Moderate:'#f39c12',High:'#e67e22','Very High':'#e74c3c'};
-const PALETTE=['#E8601A','#2980b9','#27ae60','#8e44ad','#e74c3c','#16a085','#f39c12','#2c3e50','#d35400','#1abc9c','#c0392b','#7f8c8d','#3498db','#e91e63','#009688','#ff5722','#673ab7','#4caf50','#ff9800','#795548','#607d8b','#f06292','#00bcd4','#8bc34a','#9c27b0'];
+const PALETTE=['#E8601A','#2980b9','#27ae60','#8e44ad','#e74c3c','#16a085','#f39c12','#2c3e50','#d35400','#1abc9c','#c0392b','#7f8c8d','#3498db','#e91e63','#009688','#ff5722','#673ab7','#4caf50','#ff9800','#795548','#607d8b','#f06292','#00bcd4','#8bc34a','#9c27b0','#b71c1c','#0d47a1','#1b5e20','#4a148c','#e65100','#006064','#f57f17','#37474f','#880e4f','#33691e','#01579b','#bf360c','#004d40','#827717','#212121','#6a1b9a','#0277bd','#558b2f','#ff6f00','#ad1457','#00838f','#c62828','#283593','#2e7d32','#6a1b9a'];
 
 function normalizeWeights(obj){
   const total=Object.values(obj).reduce((a,b)=>a+b,0);
