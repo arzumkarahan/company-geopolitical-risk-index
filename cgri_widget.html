@@ -420,7 +420,7 @@ function riskLabel(s){
   if(s<3.5)return'Low';if(s<5)return'Moderate';if(s<6.5)return'High';return'Very High';
 }
 const RISK_COLORS={Low:'#27ae60',Moderate:'#f39c12',High:'#e67e22','Very High':'#e74c3c'};
-const PALETTE=['#E8601A','#2980b9','#27ae60','#8e44ad','#e74c3c','#16a085','#f39c12','#2c3e50','#d35400','#1abc9c','#c0392b','#7f8c8d'];
+const PALETTE=['#E8601A','#2980b9','#27ae60','#8e44ad','#e74c3c','#16a085','#f39c12','#2c3e50','#d35400','#1abc9c','#c0392b','#7f8c8d','#3498db','#e91e63','#009688','#ff5722','#673ab7','#4caf50','#ff9800','#795548','#607d8b','#f06292','#00bcd4','#8bc34a','#9c27b0'];
 
 function normalizeWeights(obj){
   const total=Object.values(obj).reduce((a,b)=>a+b,0);
