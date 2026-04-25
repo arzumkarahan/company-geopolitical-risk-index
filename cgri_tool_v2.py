@@ -955,29 +955,31 @@ elif page == "🧮 Custom Calculator":
             )
 
         with cmp_col:
-            st.markdown("#### Ranking vs. benchmark portfolio")
-            custom_row = pd.DataFrame([{
-                "Company": f"▶ {company_name}", "Final CGRI": final, "Risk Category": cat,
-            }])
-            compare = pd.concat(
-                [bench_df[["Company", "Final CGRI", "Risk Category"]], custom_row],
-                ignore_index=True,
-            ).sort_values("Final CGRI", ascending=False)
-            fig_cmp = px.bar(
-                compare, x="Company", y="Final CGRI",
-                color="Risk Category", color_discrete_map=RISK_COLORS,
-                height=400,
-            )
-            fig_cmp.update_layout(
-                showlegend=False,
-                plot_bgcolor="#f7f8fc",
-                paper_bgcolor="rgba(0,0,0,0)",
-                xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=11), automargin=True),
-                yaxis=dict(gridcolor="#e4e7f0", title="CGRI Score"),
-                bargap=0.3,
-                margin=dict(b=10),
-            )
-            st.plotly_chart(fig_cmp, use_container_width=True)
+            pass  # ranking chart moved to full width below
+
+        st.markdown("#### Ranking vs. benchmark portfolio")
+        custom_row = pd.DataFrame([{
+            "Company": f"▶ {company_name}", "Final CGRI": final, "Risk Category": cat,
+        }])
+        compare = pd.concat(
+            [bench_df[["Company", "Final CGRI", "Risk Category"]], custom_row],
+            ignore_index=True,
+        ).sort_values("Final CGRI", ascending=False)
+        fig_cmp = px.bar(
+            compare, x="Company", y="Final CGRI",
+            color="Risk Category", color_discrete_map=RISK_COLORS,
+            height=480,
+        )
+        fig_cmp.update_layout(
+            showlegend=False,
+            plot_bgcolor="#f7f8fc",
+            paper_bgcolor="rgba(0,0,0,0)",
+            xaxis=dict(showgrid=False, tickangle=-90, tickfont=dict(size=10), automargin=True),
+            yaxis=dict(gridcolor="#e4e7f0", title="CGRI Score"),
+            bargap=0.25,
+            margin=dict(b=120, t=20),
+        )
+        st.plotly_chart(fig_cmp, use_container_width=True)
 
         # ── Supply chain detail ──────────────────────────────────────────
         with st.expander("Supply chain detail"):
