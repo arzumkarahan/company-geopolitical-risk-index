@@ -185,7 +185,7 @@ def compute_cgri(
     country_risk: dict,
     sector_mult_lookup: dict,
     volatility_mult: float,
-    company_name: str = "Custom Corporate",
+    company_name: str = "Custom Company",
 ) -> dict:
     hq_country = str(hq_country).strip()
     sector = str(sector).strip()
@@ -443,7 +443,7 @@ tab_dash, tab_calc = st.tabs(["📊 Benchmark Dashboard", "🧮 Custom Calculato
 
 # ─────────────────────────── TAB 1: BENCHMARK ───────────────────────────────
 with tab_dash:
-    st.subheader("25-Corporate Benchmark Portfolio (2024)")
+    st.subheader("25-Company Benchmark Portfolio (2024)")
 
     # ── Filters ─────────────────────────────────────────────────────────────
     f1, f2, f3 = st.columns([2, 2, 1])
@@ -530,15 +530,15 @@ with tab_dash:
 
 # ─────────────────────────── TAB 2: CALCULATOR ──────────────────────────────
 with tab_calc:
-    st.subheader("Custom Corporate CGRI Calculator")
+    st.subheader("Custom Company CGRI Calculator")
     st.caption(
         "Enter country-level exposure weights (any unit — auto-normalised to 100%). "
         "All fields must have at least one country entry to be scored."
     )
 
-    # ── Corporate metadata ─────────────────────────────────────────────────────
+    # ── Company metadata ─────────────────────────────────────────────────────
     r1c1, r1c2 = st.columns(2)
-    company_name  = r1c1.text_input("Corporate name", value="My Corporate")
+    company_name  = r1c1.text_input("Company name", value="My Company")
     hq_country    = r1c2.selectbox("HQ country", country_options)
 
     r2c1, r2c2 = st.columns(2)
