@@ -986,16 +986,16 @@ function computeCGRI(){
   const calcBarW=Math.max(900, allWithCustom.length*22);
   calcBarWrap.style.width=calcBarW+'px';
   calcBarCanvas.style.width='100%';
-  calcBarCanvas.style.height='340px';
+  calcBarCanvas.style.height='400px';
   calcBarCanvas.width=calcBarW*window.devicePixelRatio;
-  calcBarCanvas.height=340*window.devicePixelRatio;
+  calcBarCanvas.height=400*window.devicePixelRatio;
   calcBarChart=new Chart(calcBarCanvas,{
     type:'bar',
     data:{
       labels:allWithCustom.map(d=>d.company),
-      datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#1a1a1a':riskColor(d.cgri)),borderRadius:3}]
+      datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#E8601A':riskColor(d.cgri)),borderRadius:3}]
     },
-    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:9}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
+    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:13}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
   });
 
   document.getElementById('calc-results').style.display='block';
