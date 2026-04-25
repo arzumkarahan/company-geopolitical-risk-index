@@ -116,6 +116,29 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .comp-card .cl{font-size:0.68rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
 .comp-card .cd{font-size:0.7rem;color:#bbb;margin-top:2px}
 
+/* ── Supply chain detail ── */
+.sc-detail{background:#fff;border:1px solid #e0e0e0;border-radius:10px;margin-bottom:20px;overflow:hidden}
+.sc-detail summary{padding:14px 18px;cursor:pointer;font-weight:700;font-size:0.88rem;color:#1a1a1a;list-style:none;display:flex;align-items:center;gap:8px;user-select:none}
+.sc-detail summary::-webkit-details-marker{display:none}
+.sc-detail summary::before{content:'›';font-size:1.1rem;color:#E8601A;transition:transform .2s;display:inline-block}
+.sc-detail[open] summary::before{transform:rotate(90deg)}
+.sc-detail summary:hover{background:#fffaf8}
+.sc-detail-body{padding:14px 18px 18px}
+.sc-table{width:100%;border-collapse:collapse;font-size:0.83rem}
+.sc-table td{padding:8px 12px;border:1px solid #eee;color:#333}
+.sc-table td:first-child{color:#555}
+.sc-table td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#1a1a1a}
+.sc-table tr:last-child td{font-weight:700;background:#fdf2ee;color:#E8601A}
+.sc-table tr:last-child td:last-child{color:#E8601A}
+
+/* ── Export ── */
+.export-section{background:#fff;border-radius:10px;padding:20px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px}
+.export-section h3{font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:14px}
+.export-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-export{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border:1.5px solid #ccc;border-radius:8px;background:#fff;font-size:0.85rem;font-weight:600;color:#333;cursor:pointer;transition:all .15s}
+.btn-export:hover{border-color:#E8601A;color:#E8601A;background:#fffaf8}
+.btn-export svg{flex-shrink:0}
+
 /* ── Methodology ── */
 .method-intro{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px;font-size:0.85rem;color:#555;line-height:1.7;border-left:4px solid #E8601A}
 .method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -278,6 +301,16 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
           <div class="lev-hint" id="lev-hint">Financial multiplier: ×0.9</div>
         </div>
       </div>
+      <div style="margin-top:16px;padding:12px 14px;background:#f9f9f9;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;gap:10px">
+        <label class="tog-switch" style="flex-shrink:0">
+          <input type="checkbox" id="c-public" checked/>
+          <span class="tog-slider"></span>
+        </label>
+        <div>
+          <div style="font-size:0.82rem;font-weight:700;color:#1a1a1a">Publicly traded on a stock exchange</div>
+          <div style="font-size:0.75rem;color:#999;margin-top:2px">The VIX-based volatility multiplier (×0.9348) is applied only to listed companies. Disable for private firms.</div>
+        </div>
+      </div>
     </div>
 
     <div class="calc-section">
@@ -319,6 +352,13 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
       <div class="two-col">
         <div class="chart-box">
           <div class="section-title">Risk Profile vs Benchmark Average</div>
+          <div class="radar-toggle-row" style="margin-bottom:8px">
+            <label class="tog-switch">
+              <input type="checkbox" id="calc-radar-expanded" onchange="renderCalcRadar()"/>
+              <span class="tog-slider"></span>
+            </label>
+            <span class="tog-label">Expanded view (+ Financial &amp; Sector multipliers)</span>
+          </div>
           <canvas id="calcRadar"></canvas>
         </div>
         <div class="chart-box">
@@ -326,6 +366,8 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
           <canvas id="calcBar"></canvas>
         </div>
       </div>
+      <div id="sc-detail-wrap"></div>
+      <div id="export-wrap"></div>
     </div>
   </div>
 
@@ -399,7 +441,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
         <div class="source-list">
           <div class="source-item"><span class="source-icon">🌍</span><div class="source-text"><b>Country GRI Scores</b> — 147 countries · geopriskindex.com · 2024 edition</div></div>
           <div class="source-item"><span class="source-icon">🏭</span><div class="source-text"><b>Sector Multipliers</b> — S&amp;P Global Industry Risk Assessment · 54 industry sectors across 6 risk tiers</div></div>
-          <div class="source-item"><span class="source-icon">📈</span><div class="source-text"><b>Volatility Multiplier</b> — CBOE VIX annual average (FRED) · 2024 average = <b>0.9348</b></div></div>
+          <div class="source-item"><span class="source-icon">📈</span><div class="source-text"><b>Volatility Multiplier</b> — CBOE VIX annual average (FRED) · 2024 average = <b>0.9348</b> · <span style="color:#e67e22;font-weight:600">Applied only to publicly listed companies.</span> Private companies use a neutral multiplier of ×1.0.</div></div>
           <div class="source-item"><span class="source-icon">🏢</span><div class="source-text"><b>Benchmark Company Data</b> — 25 global companies · Bloomberg financial data · 2024 fiscal year</div></div>
         </div>
       </div>
@@ -659,9 +701,209 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CALCULATOR — gauge builder
+// ═══════════════════════════════════════════════════════════════════════════
+function buildGaugeHTML(score, name, rl) {
+  // Layout constants
+  const W=320, cx=160, cy=162;
+  const Ro=128, Ri=72; // thick arc (56px) for a solid, readable gauge
+
+  const CAT_COLOR={Low:'#27ae60',Moderate:'#e8a020',High:'#e67e22','Very High':'#e74c3c'};
+
+  // Soft pastel fills — no white borders so zones blend cleanly
+  const ZONES=[
+    {s1:0,   s2:3.5, bg:'#b8e8c8'},   // muted green
+    {s1:3.5, s2:5,   bg:'#f5e8b0'},   // muted yellow
+    {s1:5,   s2:6.5, bg:'#f5ceaa'},   // muted orange
+    {s1:6.5, s2:10,  bg:'#f5c0bc'},   // muted red
+  ];
+
+  // score → angle (π at s=0 left, 0 at s=10 right)
+  function sA(s){return Math.PI*(1-s/10);}
+  function Pxy(a,r){return[cx+r*Math.cos(a),cy-r*Math.sin(a)];}
+  function Ps(a,r){const[x,y]=Pxy(a,r);return x.toFixed(2)+','+y.toFixed(2);}
+
+  // Seamless donut segment — no stroke so zones sit flush against each other
+  function seg(s1,s2,ro,ri,fill){
+    const a1=sA(s1),a2=sA(s2),lf=(s2-s1)>5?1:0;
+    return '<path fill="'+fill+'" d="M'+Ps(a1,ro)+
+      ' A'+ro+','+ro+',0,'+lf+',0,'+Ps(a2,ro)+
+      ' L'+Ps(a2,ri)+
+      ' A'+ri+','+ri+',0,'+lf+',1,'+Ps(a1,ri)+' Z"/>';
+  }
+
+  const arcs=ZONES.map(z=>seg(z.s1,z.s2,Ro,Ri,z.bg)).join('');
+
+  // Thin elegant needle: long tapered line from pivot to arc face
+  const sc=Math.max(0.1,Math.min(9.9,score));
+  const na=sA(sc);
+  const nc=CAT_COLOR[rl]||'#e67e22';
+  const[ntx,nty]=Pxy(na,Ro-4);          // tip just inside outer edge
+  const perp=na+Math.PI/2;
+  const bw=3, bd=18;                     // base half-width, base distance from pivot
+  const[b1x,b1y]=[cx+bd*Math.cos(na)+bw*Math.cos(perp), cy-bd*Math.sin(na)-bw*Math.sin(perp)];
+  const[b2x,b2y]=[cx+bd*Math.cos(na)-bw*Math.cos(perp), cy-bd*Math.sin(na)+bw*Math.sin(perp)];
+  const needle='<polygon fill="'+nc+'" points="'+
+    ntx.toFixed(2)+','+nty.toFixed(2)+' '+
+    b1x.toFixed(2)+','+b1y.toFixed(2)+' '+
+    b2x.toFixed(2)+','+b2y.toFixed(2)+'"/>';
+  const pivot='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="'+nc+'"/>';
+
+  // Tick dashes + labels at 0 2 4 6 8 10
+  const ticks=[0,2,4,6,8,10].map(v=>{
+    const a=sA(v);
+    const[t1x,t1y]=Pxy(a,Ro+4);
+    const[t2x,t2y]=Pxy(a,Ro+13);
+    const[lx,ly]=Pxy(a,Ro+26);
+    // nudge extreme labels inward so they don't clip
+    const anchor=v===0?'end':v===10?'start':'middle';
+    return '<line x1="'+t1x.toFixed(1)+'" y1="'+t1y.toFixed(1)+
+           '" x2="'+t2x.toFixed(1)+'" y2="'+t2y.toFixed(1)+
+           '" stroke="#ccc" stroke-width="1.5"/>'+
+           '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+
+           '" text-anchor="'+anchor+'" dominant-baseline="middle"'+
+           ' font-size="12" fill="#aaa" font-family="Arial,sans-serif">'+v+'</text>';
+  }).join('');
+
+  const scoreColor=CAT_COLOR[rl]||'#e67e22';
+
+  return '<div class="chart-box" style="padding:22px 16px 14px;text-align:center">'+
+    '<div style="font-size:1.05rem;font-weight:700;color:#1a1a1a;margin-bottom:3px">'+rl+'</div>'+
+    '<div style="font-size:0.83rem;color:#999;margin-bottom:2px">'+name+'</div>'+
+    '<svg viewBox="20 0 280 198" width="100%" style="max-width:340px;display:block;margin:0 auto">'+
+      arcs+ticks+needle+pivot+
+      '<text x="'+cx+'" y="192" text-anchor="middle" font-size="46" font-weight="800"'+
+      ' fill="'+scoreColor+'" font-family="Arial,sans-serif">'+score.toFixed(2)+'</text>'+
+    '</svg>'+
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // CALCULATOR — compute
 // ═══════════════════════════════════════════════════════════════════════════
-let calcRadarChart, calcBarChart;
+let calcRadarChart, calcBarChart, calcResult=null;
+
+function renderCalcRadar(){
+  if(!calcResult)return;
+  const{name,hqRisk,revComp,scComp,fm,sm}=calcResult;
+  const expanded=document.getElementById('calc-radar-expanded').checked;
+  const bAvgHQ=DATA.benchmark.reduce((s,d)=>s+d.hq_risk,0)/DATA.benchmark.length;
+  const bAvgRev=DATA.benchmark.reduce((s,d)=>s+d.revenue,0)/DATA.benchmark.length;
+  const bAvgSC=DATA.benchmark.reduce((s,d)=>s+d.supply_chain,0)/DATA.benchmark.length;
+  let dims,myData,bData;
+  if(expanded){
+    dims=['HQ Risk','Revenue Exposure','Supply Chain','Fin. Leverage','Sector Risk'];
+    const toFinNorm=m=>(m-0.8)/(1.2-0.8)*10;
+    const toSecNorm=m=>(m-0.75)/(1.25-0.75)*10;
+    myData=[hqRisk,revComp,scComp,toFinNorm(fm),toSecNorm(sm)];
+    const bAvgFin=DATA.benchmark.reduce((s,d)=>s+toFinNorm(d.fin_mult),0)/DATA.benchmark.length;
+    const bAvgSec=DATA.benchmark.reduce((s,d)=>s+toSecNorm(d.sec_mult),0)/DATA.benchmark.length;
+    bData=[bAvgHQ,bAvgRev,bAvgSC,bAvgFin,bAvgSec];
+  } else {
+    dims=['HQ Risk','Revenue Exposure','Supply Chain'];
+    myData=[hqRisk,revComp,scComp];
+    bData=[bAvgHQ,bAvgRev,bAvgSC];
+  }
+  if(calcRadarChart)calcRadarChart.destroy();
+  calcRadarChart=new Chart(document.getElementById('calcRadar'),{
+    type:'radar',
+    data:{
+      labels:dims,
+      datasets:[
+        {label:name,data:myData,borderColor:'#E8601A',backgroundColor:'#E8601A33',borderWidth:2.5,pointRadius:4},
+        {label:'Benchmark avg',data:bData,borderColor:'#2980b9',backgroundColor:'#2980b933',borderWidth:2,pointRadius:3},
+      ]
+    },
+    options:{responsive:true,scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:9}},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}
+  });
+}
+
+function renderSCDetail(){
+  if(!calcResult)return;
+  const r=calcResult;
+  const rows=[
+    ['Suppliers component (\u03a3 GRI \xd7 sup_share)', r.supComp.toFixed(4)],
+    ['Supplier-facilities component (\u03a3 GRI \xd7 fac_share)', r.facComp.toFixed(4)],
+    ['Intermediate (0.5 \xd7 A + 0.5 \xd7 B)', r.scIntermediate.toFixed(4)],
+    ['HHI suppliers', r.hhiSup.toFixed(4)],
+    ['HHI supplier facilities', r.hhiSupfac.toFixed(4)],
+    ['HHI combined (avg)', r.hhiCombined.toFixed(4)],
+    ['HHI submultiplier', r.hhiSubSC.toFixed(2)],
+    ['<b>Supply Chain Exposure</b>', r.scComp.toFixed(4)],
+  ];
+  document.getElementById('sc-detail-wrap').innerHTML=
+    '<details class="sc-detail">'+
+      '<summary>Supply chain detail</summary>'+
+      '<div class="sc-detail-body">'+
+        '<table class="sc-table">'+
+          rows.map(([label,val])=>'<tr><td>'+label+'</td><td>'+val+'</td></tr>').join('')+
+        '</table>'+
+      '</div>'+
+    '</details>';
+}
+
+function renderExport(){
+  if(!calcResult)return;
+  document.getElementById('export-wrap').innerHTML=
+    '<div class="export-section">'+
+      '<h3>Export results</h3>'+
+      '<div class="export-btns">'+
+        '<button class="btn-export" onclick="exportCSV()">'+
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'+
+          'CSV (summary)'+
+        '</button>'+
+        '<button class="btn-export" onclick="exportJSON()">'+
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'+
+          'JSON (full detail)'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function exportCSV(){
+  if(!calcResult)return;
+  const r=calcResult;
+  const rows=[
+    ['Field','Value'],
+    ['Company',r.name],['HQ Country',r.hqC],['Sector',r.sector],['Net Debt/EBITDA',r.leverage],['Publicly Traded',r.isPublic?'Yes':'No'],
+    ['HQ Risk',r.hqRisk.toFixed(4)],['Revenue Exposure',r.revComp.toFixed(4)],['Supply Chain',r.scComp.toFixed(4)],
+    ['Financial Multiplier',r.fm.toFixed(2)],['Sector Multiplier',r.sm.toFixed(4)],['Volatility Multiplier',r.vm.toFixed(6)+' ('+(r.isPublic?'applied':'not applied — private company')+')'],
+    ['CGRI Score',r.cgri.toFixed(4)],['Risk Category',r.rl],
+    ['Suppliers Component',r.supComp.toFixed(4)],['Facilities Component',r.facComp.toFixed(4)],
+    ['SC Intermediate',r.scIntermediate.toFixed(4)],['HHI Suppliers',r.hhiSup.toFixed(4)],
+    ['HHI Supplier Facilities',r.hhiSupfac.toFixed(4)],['HHI Combined',r.hhiCombined.toFixed(4)],
+    ['HHI Submultiplier (SC)',r.hhiSubSC.toFixed(2)],['HHI Submultiplier (Rev)',r.hhiSubRev.toFixed(2)],
+  ];
+  const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  download(r.name.replace(/\s+/g,'_')+'_CGRI.csv','text/csv',csv);
+}
+
+function exportJSON(){
+  if(!calcResult)return;
+  const r=calcResult;
+  const obj={
+    company:r.name,hq_country:r.hqC,sector:r.sector,net_debt_ebitda:r.leverage,
+    scores:{hq_risk:r.hqRisk,revenue_exposure:r.revComp,supply_chain:r.scComp,cgri:r.cgri},
+    risk_category:r.rl,
+    multipliers:{financial:r.fm,sector:r.sm,volatility:r.vm},
+    supply_chain_detail:{
+      suppliers_component:r.supComp,facilities_component:r.facComp,
+      intermediate:r.scIntermediate,hhi_suppliers:r.hhiSup,
+      hhi_facilities:r.hhiSupfac,hhi_combined:r.hhiCombined,hhi_submultiplier:r.hhiSubSC
+    },
+    revenue_hhi:{hhi:r.hhiRev,submultiplier:r.hhiSubRev},
+    revenue_shares:r.revShares,supplier_shares:r.supShares,facility_shares:r.supfacShares
+  };
+  download(r.name.replace(/\s+/g,'_')+'_CGRI.json','application/json',JSON.stringify(obj,null,2));
+}
+
+function download(filename,mime,content){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:mime}));
+  a.download=filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 function computeCGRI(){
   const alertBox=document.getElementById('calc-alert');
@@ -698,19 +940,15 @@ function computeCGRI(){
 
   const fm=finMult(leverage);
   const sm=DATA.sectors[sector]||1.0;
-  const vm=DATA.vol_mult;
+  const isPublic=document.getElementById('c-public').checked;
+  const vm=isPublic?DATA.vol_mult:1.0;
 
   const base=0.20*hqRisk+0.40*revComp+0.40*scComp;
   const cgri=base*sm*vm*fm;
   const rl=riskLabel(cgri);
 
-  // Score card
-  document.getElementById('score-box').innerHTML=
-    '<div class="score-card '+rl.replace(' ','-')+'">'+
-      '<div class="score-co">'+name+'</div>'+
-      '<div class="score-num">'+cgri.toFixed(2)+'</div>'+
-      '<div class="score-cat">'+rl+' Risk</div>'+
-    '</div>';
+  // Score gauge
+  document.getElementById('score-box').innerHTML=buildGaugeHTML(cgri,name,rl);
 
   // Component cards
   document.getElementById('comp-cards').innerHTML=
@@ -719,24 +957,26 @@ function computeCGRI(){
     '<div class="comp-card"><div class="cl">Supply Chain</div><div class="cv">'+scComp.toFixed(2)+'</div><div class="cd">HHI sub \xd7'+hhiSub(hhiCombined).toFixed(2)+'</div></div>'+
     '<div class="comp-card"><div class="cl">Financial Leverage</div><div class="cv">\xd7'+fm.toFixed(1)+'</div><div class="cd">Net D/EBITDA '+leverage.toFixed(2)+'</div></div>'+
     '<div class="comp-card"><div class="cl">Sector Multiplier</div><div class="cv">\xd7'+sm.toFixed(2)+'</div><div class="cd">'+sector+'</div></div>'+
-    '<div class="comp-card"><div class="cl">Volatility Multiplier</div><div class="cv">\xd7'+vm.toFixed(4)+'</div><div class="cd">2024 VIX avg</div></div>';
+    '<div class="comp-card" style="'+(isPublic?'':'opacity:0.5;border:1px dashed #ddd')+'">'+
+      '<div class="cl">Volatility Multiplier</div>'+
+      '<div class="cv" style="color:'+(isPublic?'#1a1a1a':'#aaa')+'">\xd7'+vm.toFixed(4)+'</div>'+
+      '<div class="cd" style="color:'+(isPublic?'':'#bbb')+'">'+(isPublic?'2024 VIX avg — applied':'Not applied (private company)')+'</div>'+
+    '</div>';
 
-  // Radar vs benchmark avg
-  const bAvgHQ=DATA.benchmark.reduce((s,d)=>s+d.hq_risk,0)/DATA.benchmark.length;
-  const bAvgRev=DATA.benchmark.reduce((s,d)=>s+d.revenue,0)/DATA.benchmark.length;
-  const bAvgSC=DATA.benchmark.reduce((s,d)=>s+d.supply_chain,0)/DATA.benchmark.length;
-  if(calcRadarChart)calcRadarChart.destroy();
-  calcRadarChart=new Chart(document.getElementById('calcRadar'),{
-    type:'radar',
-    data:{
-      labels:['HQ Risk','Revenue Exposure','Supply Chain'],
-      datasets:[
-        {label:name,data:[hqRisk,revComp,scComp],borderColor:'#E8601A',backgroundColor:'#E8601A33',borderWidth:2.5,pointRadius:4},
-        {label:'Benchmark avg',data:[bAvgHQ,bAvgRev,bAvgSC],borderColor:'#2980b9',backgroundColor:'#2980b933',borderWidth:2,pointRadius:3},
-      ]
-    },
-    options:{responsive:true,scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:9}},pointLabels:{font:{size:11}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}
-  });
+  // Store full result for radar toggle + supply chain detail + export
+  const hhiRev=hhi(revShares),hhiSup=hhi(supShares),hhiSupfac=hhi(supfacShares);
+  calcResult={
+    name,hqC,sector,leverage,isPublic,
+    hqRisk,revComp,scComp,
+    supComp,facComp,scIntermediate,
+    hhiRev,hhiSup,hhiSupfac,hhiCombined,
+    hhiSubRev:hhiSub(hhiRev),hhiSubSC:hhiSub(hhiCombined),
+    fm,sm,vm,base,cgri,rl,
+    revShares,supShares,supfacShares
+  };
+  renderCalcRadar();
+  renderSCDetail();
+  renderExport();
 
   // Ranking bar
   const allWithCustom=[...DATA.benchmark.map(d=>({company:d.company,cgri:d.cgri,custom:false})),{company:'\u25b6 '+name,cgri:cgri,custom:true}]

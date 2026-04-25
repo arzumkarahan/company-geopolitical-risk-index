@@ -790,6 +790,18 @@ elif page == "🧮 Custom Calculator":
     fin_prev = net_debt_to_financial_multiplier(net_debt_ebitda)
     p4.caption(f"Leverage multiplier: **×{fin_prev}**")
 
+    is_public = st.toggle(
+        "Company is publicly traded on a stock exchange",
+        value=True,
+        help=(
+            "The VIX-based volatility multiplier (×0.9348 for 2024) is derived from equity-market "
+            "sentiment and is only meaningful for listed companies. Disable this for private firms — "
+            "the multiplier will be set to ×1.0 (neutral)."
+        ),
+    )
+    if not is_public:
+        st.caption("🔒 Volatility multiplier set to ×1.0 — not applicable to private companies.")
+
     st.markdown("---")
 
     # ── Step 2: Exposure tables ──────────────────────────────────────────────
@@ -849,7 +861,7 @@ elif page == "🧮 Custom Calculator":
                 supplier_facilities_by_country=supfac_input,
                 country_risk=country_risk,
                 sector_mult_lookup=sector_mult,
-                volatility_mult=vol_mult,
+                volatility_mult=vol_mult if is_public else 1.0,
                 company_name=company_name,
             )
             st.session_state["cgri_result"] = result
@@ -897,8 +909,11 @@ elif page == "🧮 Custom Calculator":
             with r3a:
                 comp_card("Sector Multiplier", f"×{result['sector_multiplier']:.2f}", sector)
             with r3b:
-                comp_card("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
-                          "2024 VIX avg (CBOE / FRED)")
+                comp_card(
+                    "Volatility Multiplier",
+                    f"×{result['volatility_multiplier']:.4f}",
+                    "2024 VIX avg (CBOE / FRED)" if is_public else "Not applied — private company (×1.0)",
+                )
 
         st.markdown("---")
 
@@ -1053,7 +1068,7 @@ $$
 | **Revenue Exposure** | 40 % | Σ(GRI_c × rev_share_c) × HHI_sub |
 | **Supply Chain** | 40 % | (0.5 × C_suppliers + 0.5 × C_sup_facilities) × HHI_sub |
 | **Sector Multiplier** | × | S&P Global Industry Risk Assessment |
-| **Volatility Multiplier** | × | 1 + Δ% vs. long-run VIX average |
+| **Volatility Multiplier** | × | 1 + Δ% vs. long-run VIX average — **applied to publicly listed companies only** |
 | **Financial Leverage** | × | 0.8 / 0.9 / 1.0 / 1.1 / 1.2 from Net Debt / EBITDA |
 """)
 
@@ -1093,6 +1108,6 @@ $$
 ### Data sources
 - **Country GRI scores** — 147 countries ([geopriskindex.com](https://www.geopriskindex.com))
 - **Sector multipliers** — S&P Global Industry Risk Assessment
-- **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348**
+- **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348** · Applied to **publicly listed companies only**; private firms use a neutral multiplier of ×1.0
 - **Benchmark scores** — 25 global companies (data collected from Bloomberg)
 """)

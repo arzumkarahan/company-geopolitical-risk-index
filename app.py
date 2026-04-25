@@ -508,6 +508,18 @@ with tab2:
     sector            = c1.selectbox("Sector (S&P Global category)", sector_options)
     net_debt_to_ebitda = c2.number_input("Net debt / EBITDA (2024)", value=1.0, step=0.1, format="%.2f")
 
+    is_public = st.toggle(
+        "Company is publicly traded on a stock exchange",
+        value=True,
+        help=(
+            "The VIX-based volatility multiplier (×0.9348 for 2024) is derived from equity-market "
+            "sentiment and is only meaningful for listed companies. Disable for private firms — "
+            "the multiplier will be set to ×1.0 (neutral)."
+        ),
+    )
+    if not is_public:
+        st.caption("🔒 Volatility multiplier set to ×1.0 — not applicable to private companies.")
+
     st.divider()
 
     # ── exposure inputs ──────────────────────��───────────────────────────────
@@ -581,7 +593,7 @@ with tab2:
                 facility_sites_by_country=facility_sites_by_country,
                 country_risk_lookup=country_lookup,
                 sector_multiplier_lookup=sector_multiplier_lookup,
-                volatility_multiplier=volatility_multiplier,
+                volatility_multiplier=volatility_multiplier if is_public else 1.0,
             )
 
             final      = result["final_risk_index"]
@@ -613,7 +625,8 @@ with tab2:
                       delta_color="off")
             m4.metric("Facility Risk",        f"{result['facility_risk']:.2f}")
             m5.metric("Financial Exposure",   f"{result['financial_exposure']:.0f}")
-            m6.metric("Sector × Vol. mult",   f"{result['sector_multiplier']:.2f} × {result['volatility_multiplier']:.4f}")
+            vol_label = f"×{result['volatility_multiplier']:.4f}" if is_public else "×1.0 (private)"
+            m6.metric("Sector × Vol. mult",   f"{result['sector_multiplier']:.2f} × {vol_label}")
 
             # ── radar + benchmark comparison ─────────────────────────────────
             chart_col, bench_col = st.columns([1, 1])
@@ -691,6 +704,7 @@ with tab2:
                 "Facility Risk":       round(result["facility_risk"], 4),
                 "Financial Exposure":  result["financial_exposure"],
                 "Sector Multiplier":   result["sector_multiplier"],
+                "Publicly Traded":     "Yes" if is_public else "No",
                 "Volatility Mult.":    round(result["volatility_multiplier"], 4),
                 "Final CGRI":          round(result["final_risk_index"], 4),
                 "Risk Category":       cat_label,
@@ -744,5 +758,5 @@ $$
 scores range from 2 (strongly net cash) to 10 (highly leveraged, x ≥ 6).
 
 **Data sources:** Country GRI 2024, HQ Country Risk Index, Revenue/Supply Chain/Facility Exposure Excel data,
-Sector Risk based on S&P Global Industry Risk Assessment, Volatility from CBOE VIX (FRED: VIXCLS).
+Sector Risk based on S&P Global Industry Risk Assessment, Volatility from CBOE VIX (FRED: VIXCLS) — applied to publicly listed companies only.
     """)

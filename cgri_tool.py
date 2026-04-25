@@ -553,6 +553,18 @@ with tab_calc:
     fin_preview = net_debt_to_financial_score(net_debt_ebitda)
     r2c2.caption(f"→ Financial Exposure score: **{fin_preview}** / 10")
 
+    is_public = st.toggle(
+        "Company is publicly traded on a stock exchange",
+        value=True,
+        help=(
+            "The VIX-based volatility multiplier (×0.9348 for 2024) is derived from equity-market "
+            "sentiment and is only meaningful for listed companies. Disable for private firms — "
+            "the multiplier will be set to ×1.0 (neutral)."
+        ),
+    )
+    if not is_public:
+        st.caption("🔒 Volatility multiplier set to ×1.0 — not applicable to private companies.")
+
     st.divider()
 
     # ── Exposure inputs ──────────────────────────────────────────────────────
@@ -601,7 +613,7 @@ with tab_calc:
                 facility_by_country=fac_input,
                 country_risk=country_risk,
                 sector_mult_lookup=sector_mult,
-                volatility_mult=vol_mult,
+                volatility_mult=vol_mult if is_public else 1.0,
                 company_name=company_name,
             )
 
@@ -639,8 +651,12 @@ with tab_calc:
             m6, m7, _ = st.columns(3)
             m6.metric("Sector Multiplier",   f"×{result['sector_multiplier']:.2f}",
                       delta=sector, delta_color="off")
-            m7.metric("Volatility Multiplier", f"×{result['volatility_multiplier']:.4f}",
-                      delta="2024 VIX avg vs long-term", delta_color="off")
+            m7.metric(
+                "Volatility Multiplier",
+                f"×{result['volatility_multiplier']:.4f}",
+                delta="2024 VIX avg (CBOE)" if is_public else "Not applied — private company (×1.0)",
+                delta_color="off",
+            )
 
             # ── Supply chain detail ──────────────────────────────────────────
             with st.expander("Supply chain detail"):
@@ -805,5 +821,5 @@ $$
 ### Data sources
 - **Country GRI (2024)**: proprietary 147-country index
 - **Sector multipliers**: S&P Global Ratings Industry Risk Assessment
-- **Volatility multiplier**: CBOE VIX (FRED: VIXCLS) — 2024 annual avg vs. long-term avg of 19.87
+- **Volatility multiplier**: CBOE VIX (FRED: VIXCLS) — 2024 annual avg vs. long-term avg of 19.87 · **Applied to publicly listed companies only**; private firms use ×1.0
 """)
