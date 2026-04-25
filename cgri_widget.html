@@ -361,11 +361,11 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
           </div>
           <canvas id="calcRadar"></canvas>
         </div>
-        <div class="chart-box">
+        <div class="chart-box" style="min-width:0;overflow:hidden">
           <div class="section-title">Ranking vs Benchmark Portfolio</div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-            <div style="min-width:900px">
-              <canvas id="calcBar"></canvas>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">
+            <div id="calcBarWrap" style="min-width:900px">
+              <canvas id="calcBar" style="display:block"></canvas>
             </div>
           </div>
         </div>
@@ -987,8 +987,10 @@ function computeCGRI(){
     .sort((a,b)=>b.cgri-a.cgri);
   if(calcBarChart)calcBarChart.destroy();
   const calcBarCanvas=document.getElementById('calcBar');
+  const calcBarWrap=document.getElementById('calcBarWrap');
   const calcBarW=Math.max(900, allWithCustom.length*22);
-  calcBarCanvas.style.width=calcBarW+'px';
+  calcBarWrap.style.width=calcBarW+'px';
+  calcBarCanvas.style.width='100%';
   calcBarCanvas.style.height='340px';
   calcBarCanvas.width=calcBarW*window.devicePixelRatio;
   calcBarCanvas.height=340*window.devicePixelRatio;
