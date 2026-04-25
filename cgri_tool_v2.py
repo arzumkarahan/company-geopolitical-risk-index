@@ -645,7 +645,7 @@ with st.sidebar:
 if page == "📊 Benchmark Dashboard":
 
     st.markdown("## Benchmark Dashboard")
-    st.markdown("25-company portfolio · 2024 CGRI scores")
+    st.markdown("48-company portfolio · 2024 CGRI scores")
 
     # ── Summary KPIs ────────────────────────────────────────────────────────
     avg_cgri = bench_df["Final CGRI"].mean()
@@ -700,7 +700,7 @@ if page == "📊 Benchmark Dashboard":
     st.markdown("#### Risk dimension comparison")
     rc1, rc2 = st.columns([3, 1])
     sel_cos = rc1.multiselect(
-        "Select companies to compare (all 25 supported)",
+        "Select companies to compare (all 48 supported)",
         options=view["Company"].tolist(),
         default=view["Company"].tolist()[:3],
     )
@@ -1109,5 +1109,5 @@ $$
 - **Country GRI scores** — 147 countries ([geopriskindex.com](https://www.geopriskindex.com))
 - **Sector multipliers** — S&P Global Industry Risk Assessment
 - **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348** · Applied to **publicly listed companies only**; private firms use a neutral multiplier of ×1.0
-- **Benchmark scores** — 25 global companies (data collected from Bloomberg)
+- **Benchmark scores** — 48 global companies (data collected from Bloomberg)
 """)
