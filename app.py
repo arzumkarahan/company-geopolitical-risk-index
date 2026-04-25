@@ -386,7 +386,7 @@ tab1, tab2 = st.tabs(["📊 Benchmark Dashboard", "🧮 Custom Calculator"])
 # TAB 1 — DASHBOARD
 # ════════════════════════════════════════════════════════════════════════════
 with tab1:
-    st.subheader("25-Company Benchmark Portfolio")
+    st.subheader("25-Corporate Benchmark Portfolio")
 
     # ── filters ─────────────────────────────────────────────────────────────
     col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
@@ -425,7 +425,7 @@ with tab1:
             hover_data=["Sector", "HQ Risk", "Revenue Exposure", "Supply Chain",
                         "Facility Risk", "Financial Exposure",
                         "Sector Multiplier", "Volatility Multiplier"],
-            title="Final CGRI Score by Company",
+            title="Final CGRI Score by Corporate",
             height=420,
         )
         fig_bar.update_layout(xaxis_tickangle=-40, legend_title="Risk Category")
@@ -495,7 +495,7 @@ with tab1:
 # TAB 2 — CUSTOM CALCULATOR
 # ════════════════════════════════════════════════════════════════════════════
 with tab2:
-    st.subheader("Build a custom company profile")
+    st.subheader("Build a custom corporate profile")
     st.caption(
         "Enter country-level exposure weights (any unit — they are auto-normalised to 100%). "
         "Select the S&P sector category that best fits your company."
@@ -503,7 +503,7 @@ with tab2:
 
     # ── company metadata ─────────────────────────────────────────────────────
     c1, c2 = st.columns(2)
-    company_name      = c1.text_input("Company name", value="My Company")
+    company_name      = c1.text_input("Corporate name", value="My Corporate")
     hq_country        = c2.selectbox("HQ country", country_options)
     sector            = c1.selectbox("Sector (S&P Global category)", sector_options)
     net_debt_to_ebitda = c2.number_input("Net debt / EBITDA (2024)", value=1.0, step=0.1, format="%.2f")
@@ -648,7 +648,7 @@ with tab2:
                     x="Company", y="Final CGRI",
                     color="Risk Category",
                     color_discrete_map=color_map2,
-                    title="Custom company vs benchmark",
+                    title="Custom corporate vs benchmark",
                     height=380,
                 )
                 fig_bench.update_layout(xaxis_tickangle=-40, showlegend=False)
