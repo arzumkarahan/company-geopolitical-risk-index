@@ -130,7 +130,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .formula-box .f-label{color:#89b4fa}
 .mtable{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:8px}
 .mtable thead tr{background:#fdf2ee}
-.mtable th{padding:8px 10px;text-align:left;font-weight:700;color:#E8601A;border-bottom:2px solid #fad7c5;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.03em}
+.mtable th{padding:8px 10px;text-align:left;font-weight:700;color:#E8601A;background:#fdf2ee;border-bottom:2px solid #fad7c5;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.03em;cursor:default;user-select:none}
 .mtable td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:#333;font-size:0.82rem}
 .mtable tr:hover td{background:#fffaf8}
 .mtable tr:last-child td{border-bottom:none}
