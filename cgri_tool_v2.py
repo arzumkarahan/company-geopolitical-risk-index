@@ -287,7 +287,7 @@ def _ws(path, sheet):
     return load_workbook(path, data_only=True)[sheet]
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_all():
     ws = _ws(DATA_DIR / "HQ Country Risk Index.xlsx", "Geopolitical Risk Index")
     country_rows = []
