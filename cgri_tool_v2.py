@@ -243,7 +243,7 @@ def compute_cgri(
     revenue_by_country: dict, suppliers_by_country: dict,
     supplier_facilities_by_country: dict,
     country_risk: dict, sector_mult_lookup: dict,
-    volatility_mult: float, company_name: str = "Custom Corporate",
+    volatility_mult: float, company_name: str = "Custom Company",
 ) -> dict:
     hq_country = str(hq_country).strip()
     sector     = str(sector).strip()
@@ -645,7 +645,7 @@ with st.sidebar:
 if page == "📊 Benchmark Dashboard":
 
     st.markdown("## Benchmark Dashboard")
-    st.markdown("25-corporate portfolio · 2024 CGRI scores")
+    st.markdown("25-company portfolio · 2024 CGRI scores")
 
     # ── Summary KPIs ────────────────────────────────────────────────────────
     avg_cgri = bench_df["Final CGRI"].mean()
@@ -778,9 +778,9 @@ elif page == "🧮 Custom Calculator":
     st.markdown("## Custom CGRI Calculator")
 
     # ── Step 1: Company profile ──────────────────────────────────────────────
-    st.markdown("### Step 1 — Corporate profile")
+    st.markdown("### Step 1 — Company profile")
     p1, p2, p3, p4 = st.columns([2, 2, 2, 1.5])
-    company_name    = p1.text_input("Corporate name", value="My Corporate")
+    company_name    = p1.text_input("Company name", value="My Company")
     hq_country      = p2.selectbox("HQ country", country_options)
     sector          = p3.selectbox("Sector (S&P Global)", sector_options)
     net_debt_ebitda = p4.number_input(
