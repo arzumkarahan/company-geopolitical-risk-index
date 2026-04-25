@@ -363,7 +363,11 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
         </div>
         <div class="chart-box">
           <div class="section-title">Ranking vs Benchmark Portfolio</div>
-          <canvas id="calcBar"></canvas>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+            <div style="min-width:900px">
+              <canvas id="calcBar"></canvas>
+            </div>
+          </div>
         </div>
       </div>
       <div id="sc-detail-wrap"></div>
@@ -982,13 +986,19 @@ function computeCGRI(){
   const allWithCustom=[...DATA.benchmark.map(d=>({company:d.company,cgri:d.cgri,custom:false})),{company:'\u25b6 '+name,cgri:cgri,custom:true}]
     .sort((a,b)=>b.cgri-a.cgri);
   if(calcBarChart)calcBarChart.destroy();
-  calcBarChart=new Chart(document.getElementById('calcBar'),{
+  const calcBarCanvas=document.getElementById('calcBar');
+  const calcBarW=Math.max(900, allWithCustom.length*22);
+  calcBarCanvas.style.width=calcBarW+'px';
+  calcBarCanvas.style.height='340px';
+  calcBarCanvas.width=calcBarW*window.devicePixelRatio;
+  calcBarCanvas.height=340*window.devicePixelRatio;
+  calcBarChart=new Chart(calcBarCanvas,{
     type:'bar',
     data:{
       labels:allWithCustom.map(d=>d.company),
       datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#1a1a1a':riskColor(d.cgri)),borderRadius:3}]
     },
-    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:9}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
+    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:9}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
   });
 
   document.getElementById('calc-results').style.display='block';
