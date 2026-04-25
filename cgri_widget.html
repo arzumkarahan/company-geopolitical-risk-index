@@ -466,7 +466,14 @@ function riskLabel(s){
   if(s<3.5)return'Low';if(s<5)return'Moderate';if(s<6.5)return'High';return'Very High';
 }
 const RISK_COLORS={Low:'#27ae60',Moderate:'#f39c12',High:'#e67e22','Very High':'#e74c3c'};
-const PALETTE=['#E8601A','#2980b9','#27ae60','#8e44ad','#e74c3c','#16a085','#f39c12','#2c3e50','#d35400','#1abc9c','#c0392b','#7f8c8d','#3498db','#e91e63','#009688','#ff5722','#673ab7','#4caf50','#ff9800','#795548','#607d8b','#f06292','#00bcd4','#8bc34a','#9c27b0','#b71c1c','#0d47a1','#1b5e20','#4a148c','#e65100','#006064','#f57f17','#37474f','#880e4f','#33691e','#01579b','#bf360c','#004d40','#827717','#212121','#6a1b9a','#0277bd','#558b2f','#ff6f00','#ad1457','#00838f','#c62828','#283593','#2e7d32','#6a1b9a'];
+// Golden-angle hue spacing — guarantees max visual separation for any N
+function goldenColor(i,alpha){
+  const h=((i*137.508)%360).toFixed(1);
+  const s=72;
+  // Slightly darken yellows (hue 45-75) which look washed out at 50% lightness
+  const l=(h>45&&h<75)?40:50;
+  return alpha!=null?`hsla(${h},${s}%,${l}%,${alpha})`:`hsl(${h},${s}%,${l}%)`;
+}
 
 function normalizeWeights(obj){
   const total=Object.values(obj).reduce((a,b)=>a+b,0);
@@ -606,28 +613,16 @@ function updateRadar(){
   let dims,datasets;
   if(expanded){
     dims=['HQ Risk','Revenue Exposure','Supply Chain','Fin. Leverage','Sector Risk'];
-    datasets=rows.map((d,i)=>({
-      label:d.company,
-      data:[
-        d.hq_risk,
-        d.revenue,
-        d.supply_chain,
-        (d.fin_mult-0.8)/(1.2-0.8)*10,
-        (d.sec_mult-0.75)/(1.25-0.75)*10,
-      ],
-      borderColor:PALETTE[i%PALETTE.length],
-      backgroundColor:PALETTE[i%PALETTE.length]+'33',
-      borderWidth:2,pointRadius:3,
-    }));
+    datasets=rows.map((d)=>{
+      const ci=DATA.benchmark.findIndex(b=>b.company===d.company);
+      return{label:d.company,data:[d.hq_risk,d.revenue,d.supply_chain,(d.fin_mult-0.8)/(1.2-0.8)*10,(d.sec_mult-0.75)/(1.25-0.75)*10],borderColor:goldenColor(ci),backgroundColor:goldenColor(ci,0.15),borderWidth:2,pointRadius:3};
+    });
   } else {
     dims=['HQ Risk','Revenue Exposure','Supply Chain'];
-    datasets=rows.map((d,i)=>({
-      label:d.company,
-      data:[d.hq_risk,d.revenue,d.supply_chain],
-      borderColor:PALETTE[i%PALETTE.length],
-      backgroundColor:PALETTE[i%PALETTE.length]+'33',
-      borderWidth:2,pointRadius:3,
-    }));
+    datasets=rows.map((d)=>{
+      const ci=DATA.benchmark.findIndex(b=>b.company===d.company);
+      return{label:d.company,data:[d.hq_risk,d.revenue,d.supply_chain],borderColor:goldenColor(ci),backgroundColor:goldenColor(ci,0.15),borderWidth:2,pointRadius:3};
+    });
   }
   if(radarChart)radarChart.destroy();
   radarChart=new Chart(document.getElementById('radarChart'),{
