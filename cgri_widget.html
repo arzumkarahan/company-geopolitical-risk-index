@@ -731,7 +731,20 @@ function buildGaugeHTML(score, name, rl) {
       ' A'+ri+','+ri+',0,'+lf+',1,'+Ps(a1,ri)+' Z"/>';
   }
 
-  const arcs=ZONES.map(z=>seg(z.s1,z.s2,Ro,Ri,z.bg)).join('');
+  const Rrim=Ro+10, Rinner=Ri-8; // outer rim and inner trim radii
+
+  // Outer gray rim (draw first so zones sit on top)
+  const outerRim=seg(0,10,Rrim,Ro,'#d4d4d4');
+  // Inner gray trim
+  const innerTrim=seg(0,10,Ri,Rinner,'#e0e0e0');
+  // Dark stroke outline on outer edge of rim
+  const outerStroke='<path fill="none" stroke="#aaa" stroke-width="1.5" d="M'+Ps(sA(0),Rrim)+' A'+Rrim+','+Rrim+',0,1,0,'+Ps(sA(10),Rrim)+'"/>';
+  const innerStroke='<path fill="none" stroke="#bbb" stroke-width="1" d="M'+Ps(sA(0),Rinner)+' A'+Rinner+','+Rinner+',0,1,0,'+Ps(sA(10),Rinner)+'"/>';
+  // Base lines closing left and right sides
+  const baseL='<line x1="'+Pxy(sA(0),Rrim)[0].toFixed(1)+'" y1="'+cy+'" x2="'+Pxy(sA(0),Rinner)[0].toFixed(1)+'" y2="'+cy+'" stroke="#bbb" stroke-width="1.5"/>';
+  const baseR='<line x1="'+Pxy(sA(10),Rrim)[0].toFixed(1)+'" y1="'+cy+'" x2="'+Pxy(sA(10),Rinner)[0].toFixed(1)+'" y2="'+cy+'" stroke="#bbb" stroke-width="1.5"/>';
+
+  const arcs=outerRim+innerTrim+outerStroke+innerStroke+baseL+baseR+ZONES.map(z=>seg(z.s1,z.s2,Ro,Ri,z.bg)).join('');
 
   // Thin elegant needle: long tapered line from pivot to arc face
   const sc=Math.max(0.1,Math.min(9.9,score));
@@ -748,20 +761,19 @@ function buildGaugeHTML(score, name, rl) {
     b2x.toFixed(2)+','+b2y.toFixed(2)+'"/>';
   const pivot='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="'+nc+'"/>';
 
-  // Tick dashes + labels at 0 2 4 6 8 10
+  // Tick dashes through rim + labels outside rim
   const ticks=[0,2,4,6,8,10].map(v=>{
     const a=sA(v);
-    const[t1x,t1y]=Pxy(a,Ro+4);
-    const[t2x,t2y]=Pxy(a,Ro+13);
-    const[lx,ly]=Pxy(a,Ro+26);
-    // nudge extreme labels inward so they don't clip
+    const[t1x,t1y]=Pxy(a,Ro+2);        // starts just inside outer rim
+    const[t2x,t2y]=Pxy(a,Rrim+4);      // pokes just past outer rim
+    const[lx,ly]=Pxy(a,Rrim+18);       // label beyond rim
     const anchor=v===0?'end':v===10?'start':'middle';
     return '<line x1="'+t1x.toFixed(1)+'" y1="'+t1y.toFixed(1)+
            '" x2="'+t2x.toFixed(1)+'" y2="'+t2y.toFixed(1)+
-           '" stroke="#ccc" stroke-width="1.5"/>'+
+           '" stroke="#999" stroke-width="1.5"/>'+
            '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+
            '" text-anchor="'+anchor+'" dominant-baseline="middle"'+
-           ' font-size="12" fill="#aaa" font-family="Arial,sans-serif">'+v+'</text>';
+           ' font-size="12" fill="#888" font-family="Arial,sans-serif">'+v+'</text>';
   }).join('');
 
   const scoreColor=CAT_COLOR[rl]||'#e67e22';
@@ -769,7 +781,7 @@ function buildGaugeHTML(score, name, rl) {
   return '<div class="chart-box" style="padding:22px 16px 14px;text-align:center">'+
     '<div style="font-size:1.05rem;font-weight:700;color:#1a1a1a;margin-bottom:3px">'+rl+'</div>'+
     '<div style="font-size:0.83rem;color:#999;margin-bottom:2px">'+name+'</div>'+
-    '<svg viewBox="20 0 280 198" width="100%" style="max-width:340px;display:block;margin:0 auto">'+
+    '<svg viewBox="-5 0 330 205" width="100%" style="max-width:360px;display:block;margin:0 auto">'+
       arcs+ticks+needle+pivot+
       '<text x="'+cx+'" y="192" text-anchor="middle" font-size="46" font-weight="800"'+
       ' fill="'+scoreColor+'" font-family="Arial,sans-serif">'+score.toFixed(2)+'</text>'+
