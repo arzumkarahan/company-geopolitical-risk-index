@@ -993,9 +993,9 @@ function computeCGRI(){
     type:'bar',
     data:{
       labels:allWithCustom.map(d=>d.company),
-      datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#E8601A':riskColor(d.cgri)),borderRadius:3}]
+      datasets:[{data:allWithCustom.map(d=>d.cgri),backgroundColor:allWithCustom.map(d=>d.custom?'#1a1a1a':riskColor(d.cgri)),borderRadius:3}]
     },
-    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:13}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
+    options:{responsive:false,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'CGRI: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{ticks:{maxRotation:90,font:{size:13},color:function(ctx){return allWithCustom[ctx.index]&&allWithCustom[ctx.index].custom?'#E8601A':'#444';}}},y:{beginAtZero:false,min:2,title:{display:true,text:'CGRI Score'}}}}
   });
 
   document.getElementById('calc-results').style.display='block';
