@@ -466,13 +466,20 @@ function riskLabel(s){
   if(s<3.5)return'Low';if(s<5)return'Moderate';if(s<6.5)return'High';return'Very High';
 }
 const RISK_COLORS={Low:'#27ae60',Moderate:'#f39c12',High:'#e67e22','Very High':'#e74c3c'};
-// Golden-angle hue spacing — guarantees max visual separation for any N
+// 48-slot perceptually distinct palette — varies hue + saturation + lightness
+const _PALETTE48=[
+  '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#42d4f4','#f032e6','#bfef45',
+  '#fabed4','#469990','#dcbeff','#9a6324','#b8a000','#800000','#aaffc3','#808000',
+  '#ffd8b1','#000075','#a9a9a9','#ff4500','#1e90ff','#32cd32','#ff69b4','#8b4513',
+  '#00ced1','#ff8c00','#7b68ee','#228b22','#dc143c','#00bfff','#adff2f','#9400d3',
+  '#ff6347','#40e0d0','#ee82ee','#c8a000','#b22222','#7fffd4','#da70d6','#6b8e23',
+  '#e9967a','#8fbc8f','#483d8b','#cd853f','#db7093','#2e8b57','#d2691e','#4682b4'
+];
 function goldenColor(i,alpha){
-  const h=((i*137.508)%360).toFixed(1);
-  const s=72;
-  // Slightly darken yellows (hue 45-75) which look washed out at 50% lightness
-  const l=(h>45&&h<75)?40:50;
-  return alpha!=null?`hsla(${h},${s}%,${l}%,${alpha})`:`hsl(${h},${s}%,${l}%)`;
+  const hex=_PALETTE48[i%_PALETTE48.length];
+  if(alpha==null)return hex;
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function normalizeWeights(obj){
@@ -722,20 +729,24 @@ function buildGaugeHTML(score, name, rl) {
   function Pxy(a,r){return[cx+r*Math.cos(a),cy-r*Math.sin(a)];}
   function Ps(a,r){const[x,y]=Pxy(a,r);return x.toFixed(2)+','+y.toFixed(2);}
 
-  // Seamless donut segment — no stroke so zones sit flush against each other
-  function seg(s1,s2,ro,ri,fill){
-    const a1=sA(s1),a2=sA(s2),lf=(s2-s1)>5?1:0;
-    return '<path fill="'+fill+'" d="M'+Ps(a1,ro)+
-      ' A'+ro+','+ro+',0,'+lf+',0,'+Ps(a2,ro)+
-      ' L'+Ps(a2,ri)+
-      ' A'+ri+','+ri+',0,'+lf+',1,'+Ps(a1,ri)+' Z"/>';
+  // Sample arc as discrete points — bypasses SVG arc-flag ambiguity entirely
+  function arcPts(s1,s2,r,n){
+    const out=[];
+    for(let i=0;i<=n;i++){out.push(Ps(sA(s1+(s2-s1)*i/n),r));}
+    return out;
   }
 
-  // Outer border: thick stroked arc at Ro, plus a flat base line
-  const rimArc='<path fill="none" stroke="#c8c8c8" stroke-width="10" stroke-linecap="round"'+
-    ' d="M'+Ps(sA(0),Ro)+' A'+Ro+','+Ro+',0,1,0,'+Ps(sA(10),Ro)+'"/>'+
-    '<path fill="none" stroke="#b0b0b0" stroke-width="1.5"'+
-    ' d="M'+Ps(sA(0),Ro)+' A'+Ro+','+Ro+',0,1,0,'+Ps(sA(10),Ro)+'"/>';
+  // Donut segment: outer arc forward, inner arc backward, polygon closes it
+  function seg(s1,s2,ro,ri,fill){
+    const n=Math.max(12,Math.ceil((s2-s1)*8));
+    const pts=arcPts(s1,s2,ro,n).concat(arcPts(s2,s1,ri,n));
+    return '<polygon fill="'+fill+'" points="'+pts.join(' ')+'"/>';
+  }
+
+  // Outer rim — sampled polyline traces the upper semicircle exactly
+  const rimPts=arcPts(0,10,Ro,60).join(' ');
+  const rimArc='<polyline fill="none" stroke="#c8c8c8" stroke-width="10" stroke-linecap="butt" points="'+rimPts+'"/>'+
+    '<polyline fill="none" stroke="#b0b0b0" stroke-width="1.5" points="'+rimPts+'"/>';
 
   const arcs=rimArc+ZONES.map(z=>seg(z.s1,z.s2,Ro,Ri,z.bg)).join('');
 
@@ -853,11 +864,11 @@ function renderExport(){
       '<h3>Export results</h3>'+
       '<div class="export-btns">'+
         '<button class="btn-export" onclick="exportCSV()">'+
-          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'+
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt"/></svg>'+
           'CSV (summary)'+
         '</button>'+
         '<button class="btn-export" onclick="exportJSON()">'+
-          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'+
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt"/></svg>'+
           'JSON (full detail)'+
         '</button>'+
       '</div>'+
