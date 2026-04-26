@@ -422,7 +422,7 @@ def comp_card(label: str, value: str, detail: str = ""):
     )
 
 
-def radar_chart(rows: list[dict], title: str = "", expanded: bool = False) -> go.Figure:
+def radar_chart(rows: list[dict], title: str = "", expanded: bool = False, color_indices: list[int] | None = None) -> go.Figure:
     if expanded:
         # All subcomponents, each normalised to 0–10 for a common scale.
         # Multipliers (0.75–1.25) are rescaled: (val - 0.75) / (1.25 - 0.75) * 10
@@ -454,14 +454,23 @@ def radar_chart(rows: list[dict], title: str = "", expanded: bool = False) -> go
         def _make_vals(row):
             return [row.get(d, 0) for d in dims]
 
-    pal  = px.colors.qualitative.Alphabet
+    # 48-slot perceptually distinct palette (matches HTML widget)
+    PALETTE48 = [
+        '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#42d4f4','#f032e6','#bfef45',
+        '#fabed4','#469990','#dcbeff','#9a6324','#b8a000','#800000','#aaffc3','#808000',
+        '#ffd8b1','#000075','#a9a9a9','#ff4500','#1e90ff','#32cd32','#ff69b4','#8b4513',
+        '#00ced1','#ff8c00','#7b68ee','#228b22','#dc143c','#00bfff','#adff2f','#9400d3',
+        '#ff6347','#40e0d0','#ee82ee','#c8a000','#b22222','#7fffd4','#da70d6','#6b8e23',
+        '#e9967a','#8fbc8f','#483d8b','#cd853f','#db7093','#2e8b57','#d2691e','#4682b4',
+    ]
     n    = len(rows)
     many = n > 6
 
     fig = go.Figure()
     for i, row in enumerate(rows):
         vals = _make_vals(row)
-        col  = pal[i % len(pal)]
+        idx  = color_indices[i] if color_indices and i < len(color_indices) else i
+        col  = PALETTE48[idx % len(PALETTE48)]
         fig.add_trace(go.Scatterpolar(
             r=vals + [vals[0]], theta=dims + [dims[0]],
             fill="toself" if not many else "none",
@@ -711,7 +720,10 @@ if page == "📊 Benchmark Dashboard":
         radar_rows = view[view["Company"].isin(sel_cos)][radar_cols].rename(
             columns={"Financial Multiplier": "Financial Mult.", "Sector Multiplier": "Sector Mult."}
         ).to_dict("records")
-        st.plotly_chart(radar_chart(radar_rows, expanded=expanded_radar), use_container_width=True)
+        # Stable color index = position in the full (unsorted) bench_df
+        all_cos = bench_df["Company"].tolist()
+        c_indices = [all_cos.index(r["Company"]) if r["Company"] in all_cos else i for i, r in enumerate(radar_rows)]
+        st.plotly_chart(radar_chart(radar_rows, expanded=expanded_radar, color_indices=c_indices), use_container_width=True)
 
     # ── Stacked ───────────────────────────────────────────────────────────────
     st.markdown("#### Weighted component breakdown")
