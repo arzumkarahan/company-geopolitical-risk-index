@@ -644,6 +644,13 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
+    st.markdown(
+        "<div style='font-size:0.72rem;color:#6b728a;margin-top:14px;padding-top:10px;border-top:1px solid #2a2f4a'>"
+        "&copy; 2026 Data Group 1 &mdash; CGRI Project"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+
     st.divider()
 
 
@@ -1125,3 +1132,15 @@ $$
 - **Volatility multiplier** — CBOE VIX annual average (FRED), 2024 = **0.9348** · Applied to **publicly listed companies only**; private firms use a neutral multiplier of ×1.0
 - **Benchmark scores** — 48 global companies (data collected from Bloomberg)
 """)
+
+# ── Footer ──────────────────────────────────────────────────────────────────
+st.markdown("---")
+st.markdown(
+    "<div style='text-align:center;font-size:0.78rem;color:#a0a8b8;line-height:1.9'>"
+    "<b>&copy; 2026 Data Group 1 &mdash; CGRI Project</b><br>"
+    "Calogero Emanuele Ferrante &middot; Arzum Karahan &middot; Andrea Lorusso &middot; "
+    "Angela Lorusso &middot; Van Anh Nguyen &middot; Valerio Parigi &middot; "
+    "Domenico Soprano &middot; Pietro Zini"
+    "</div>",
+    unsafe_allow_html=True,
+)
