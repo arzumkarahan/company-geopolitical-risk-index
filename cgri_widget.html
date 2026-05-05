@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Company Geopolitical Risk Index</title>
+<title>Corporate Geopolitical Risk Index</title>
 <!-- Chart.js loaded dynamically in script below -->
 <style>
 /* ── Reset & base ── */
@@ -434,7 +434,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
     <!-- Welcome banner for first-time users -->
     <div class="welcome-banner">
       <h2>👋 Welcome to the CGRI Tool</h2>
-      <p>This tool helps you understand and compute the <b>Company Geopolitical Risk Index</b> — a composite score that quantifies how exposed any company is to geopolitical disruptions, based on its headquarters location, revenue geography, and supply chain footprint. Follow the three steps below to get started.</p>
+      <p>This tool helps you understand and compute the <b>Corporate Geopolitical Risk Index</b> — a composite score that quantifies how exposed any company is to geopolitical disruptions, based on its headquarters location, revenue geography, and supply chain footprint. Follow the three steps below to get started.</p>
       <div class="welcome-steps">
         <div class="welcome-step">
           <div class="welcome-step-num">Step 1 — You are here</div>
@@ -457,7 +457,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
     </div>
 
     <div class="method-intro">
-      The <b>Company Geopolitical Risk Index (CGRI)</b> quantifies a firm's exposure to geopolitical risk across its headquarters location, revenue geography, and supply chain footprint. Three core components are combined with sector, volatility, and financial leverage adjustments.
+      The <b>Corporate Geopolitical Risk Index (CGRI)</b> quantifies a firm's exposure to geopolitical risk across its headquarters location, revenue geography, and supply chain footprint. Three core components are combined with sector, volatility, and financial leverage adjustments.
     </div>
 
     <div class="formula-box">
@@ -996,7 +996,7 @@ async function exportPDF(btn){
         'border-bottom:3px solid #E8601A;padding-bottom:16px;margin-bottom:26px">'+
         '<div>'+
           '<div style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;'+
-            'color:#E8601A;margin-bottom:5px">Company Geopolitical Risk Index &middot; 2024</div>'+
+            'color:#E8601A;margin-bottom:5px">Corporate Geopolitical Risk Index &middot; 2024</div>'+
           '<div style="font-size:1.55rem;font-weight:800;color:#1a1a1a;line-height:1.1">'+r.name+'</div>'+
           '<div style="font-size:0.74rem;color:#888;margin-top:5px">'+r.hqC+' &nbsp;&middot;&nbsp; '+sec+'</div>'+
         '</div>'+
@@ -1263,7 +1263,7 @@ function _cgriInit(){
   }
   // ── Email gate ──────────────────────────────────────────────
   // Paste your deployed Google Apps Script Web App URL here:
-  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCKakxQF-e2nkIbLhJigqCFShBNB7ycXJxmTjLFs0XfG9qpTPSTG-XoFXK923_wT8ZYg/exec';
 
   let _pdfBtn = null;
 
@@ -1324,12 +1324,13 @@ function _cgriInit(){
     _pdfBtn = null;
   };
 
-  // Close modal on backdrop click
-  document.getElementById('cgri-email-modal').addEventListener('click', function(e){
-    if(e.target === this) cgriModalClose();
-  });
+  // Close modal on backdrop click — deferred so element exists
+  function _bindModalBackdrop(){
+    var m=document.getElementById('cgri-email-modal');
+    if(m) m.addEventListener('click',function(e){if(e.target===this)cgriModalClose();});
+  }
 
-  function boot(){loadPDFLibs(_cgriInit);}
+  function boot(){loadPDFLibs(_cgriInit);_bindModalBackdrop();}
   if(typeof Chart!=='undefined'){
     boot();
   } else {
