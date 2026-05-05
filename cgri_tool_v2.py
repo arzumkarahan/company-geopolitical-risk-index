@@ -617,7 +617,7 @@ with st.sidebar:
 
     page = st.radio(
         "Navigate",
-        ["📊 Benchmark Dashboard", "🧮 Custom Calculator", "ℹ Methodology"],
+        ["ℹ Methodology", "🧮 Custom Calculator", "📊 Benchmark Dashboard"],
         label_visibility="collapsed",
     )
 
@@ -661,7 +661,11 @@ with st.sidebar:
 if page == "📊 Benchmark Dashboard":
 
     st.markdown("## Benchmark Dashboard")
-    st.markdown("48-company portfolio · 2024 CGRI scores")
+    st.markdown(
+        "Explore CGRI scores for **48 global companies** across sectors — 2024 edition. "
+        "Use the filters to narrow by risk category or sector, compare risk profiles on the radar chart, "
+        "and download the full dataset as CSV."
+    )
 
     # ── Summary KPIs ────────────────────────────────────────────────────────
     avg_cgri = bench_df["Final CGRI"].mean()
@@ -795,6 +799,12 @@ if page == "📊 Benchmark Dashboard":
 elif page == "🧮 Custom Calculator":
 
     st.markdown("## Custom CGRI Calculator")
+    st.markdown(
+        "_Enter your company's details below to compute a personalised CGRI score. "
+        "All three exposure tables (Revenue, Supplier Domiciles, Supplier Facilities) are required. "
+        "Not sure what each field means? Check the **Methodology** tab first._"
+    )
+    st.divider()
 
     # ── Step 1: Company profile ──────────────────────────────────────────────
     st.markdown("### Step 1 — Company profile")
@@ -828,7 +838,7 @@ elif page == "🧮 Custom Calculator":
     st.info(
         "**Weights are automatically standardised to sum to 100 %.** "
         "Enter any raw unit (% of sales, USD mn, supplier count, number of sites, etc.). "
-        "Rows with a blank country or zero weight are ignored.",
+        "Rows with a blank country or zero weight are ignored. **All three panels are required.**",
         icon="ℹ️",
     )
 
@@ -838,21 +848,35 @@ elif page == "🧮 Custom Calculator":
     col_a, col_b = st.columns(2, gap="large")
 
     with col_a:
-        st.markdown("#### 1  Revenue by country")
-        st.caption("Enter revenues per country in any unit (e.g. % of sales, USD mn). Auto-normalised to 100 %.")
+        st.markdown("#### 1 — Revenue by Country")
+        st.caption(
+            "**Where does your company earn its revenues?** Enter the percentage of annual sales "
+            "(or USD amounts) generated in each country. Example: 60% Germany, 40% Japan → enter 60 and 40. "
+            "This captures how much a geopolitical disruption in each market could affect your top line."
+        )
         rev_input = country_input_table("rev", country_options)
         if st.button("➕ Add country", key="add_rev"):
             add_row("rev"); st.rerun()
 
-        st.markdown("#### 3  Supplier facility distribution")
-        st.caption("Enter supplier-side facility count or % per country. Auto-normalised to 100 %.")
+        st.markdown("#### 3 — Supplier Facility Domiciles")
+        st.caption(
+            "**Where do your suppliers actually produce or operate?** Enter facility count or % weight "
+            "by physical location country. A supplier headquartered in Germany may manufacture in Vietnam — "
+            "the factory country drives *operational disruption risk* (shutdowns, port closures, labour unrest). "
+            "This often differs significantly from supplier domiciles — both inputs matter."
+        )
         supfac_input = country_input_table("supfac", country_options)
         if st.button("➕ Add country", key="add_supfac"):
             add_row("supfac"); st.rerun()
 
     with col_b:
-        st.markdown("#### 2  Supplier distribution")
-        st.caption("Enter supplier count or % per country. Auto-normalised to 100 %.")
+        st.markdown("#### 2 — Supplier Domiciles")
+        st.caption(
+            "**Where are your suppliers legally registered (corporate HQ)?** Enter the number of suppliers "
+            "or % of spend by their home country. This reflects *corporate domicile risk*: sanctions, trade "
+            "policy changes, or political instability in a supplier's home country can freeze contracts or "
+            "disrupt procurement. Note: this is the supplier's official country, not where they manufacture."
+        )
         sup_input = country_input_table("sup", country_options)
         if st.button("➕ Add country", key="add_sup"):
             add_row("sup"); st.rerun()
@@ -1038,7 +1062,76 @@ elif page == "🧮 Custom Calculator":
             "Final CGRI": round(result["final_cgri"], 4),
             "Risk Category": cat,
         }
-        e1, e2 = st.columns(2)
+
+        def _build_html_report(res, summ, cat_label, cat_color, nd, sec, pub):
+            rev_rows = "".join(
+                f"<tr><td>{c}</td><td style='text-align:right'>{w*100:.1f}%</td></tr>"
+                for c, w in res["rev_shares"].items()
+            )
+            sup_rows = "".join(
+                f"<tr><td>{c}</td><td style='text-align:right'>{w*100:.1f}%</td></tr>"
+                for c, w in res["sup_shares"].items()
+            )
+            fac_rows = "".join(
+                f"<tr><td>{c}</td><td style='text-align:right'>{w*100:.1f}%</td></tr>"
+                for c, w in res["fac_sup_shares"].items()
+            )
+            clr = {"Low":"#27ae60","Moderate":"#f39c12","High":"#e67e22","Very High":"#e74c3c"}.get(cat_label,"#888")
+            return f"""<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>CGRI Report — {res['company']}</title>
+<style>
+body{{font-family:Arial,sans-serif;color:#1a1a1a;background:#f5f5f5;margin:0;padding:20px}}
+h1{{color:#E8601A;font-size:1.6rem;margin-bottom:4px}}
+.subtitle{{color:#888;font-size:0.85rem;margin-bottom:24px}}
+.score-box{{background:{clr};color:#fff;border-radius:12px;padding:20px 28px;display:inline-block;margin-bottom:20px}}
+.score-box .num{{font-size:3rem;font-weight:800;line-height:1}}
+.score-box .cat{{font-size:1rem;opacity:0.9;margin-top:4px}}
+.cards{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}}
+.card{{background:#fff;border-radius:8px;padding:14px;box-shadow:0 1px 5px rgba(0,0,0,.07);text-align:center}}
+.card .cv{{font-size:1.4rem;font-weight:700}}
+.card .cl{{font-size:0.68rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.05em}}
+.card .cd{{font-size:0.7rem;color:#bbb;margin-top:2px}}
+table{{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px}}
+th{{background:#E8601A;color:#fff;padding:8px 10px;text-align:left}}
+td{{padding:7px 10px;border-bottom:1px solid #eee}}
+h2{{font-size:1rem;color:#E8601A;margin:18px 0 8px;border-bottom:2px solid #fde8d5;padding-bottom:4px}}
+.footer{{font-size:0.72rem;color:#aaa;margin-top:24px;border-top:1px solid #ddd;padding-top:10px}}
+@media print{{body{{background:#fff;padding:0}}}}
+</style></head><body>
+<h1>CGRI Report — {res['company']}</h1>
+<div class="subtitle">Company Geopolitical Risk Index · 2024 Edition · Generated by CGRI Tool</div>
+<div class="score-box"><div class="num">{res['final_cgri']:.2f}</div><div class="cat">{cat_label} Risk</div></div>
+<div class="cards">
+  <div class="card"><div class="cl">HQ Risk</div><div class="cv">{res['hq_risk']:.2f}</div><div class="cd">{res['hq_country']}</div></div>
+  <div class="card"><div class="cl">Revenue Exposure</div><div class="cv">{res['revenue_exposure']:.2f}</div><div class="cd">HHI sub ×{res['rev_hhi_sub']:.2f}</div></div>
+  <div class="card"><div class="cl">Supply Chain</div><div class="cv">{res['supply_chain']:.2f}</div><div class="cd">HHI sub ×{res['sc_hhi_sub']:.2f}</div></div>
+  <div class="card"><div class="cl">Financial Leverage</div><div class="cv">×{res['financial_multiplier']:.1f}</div><div class="cd">Net D/EBITDA {nd:.2f}</div></div>
+  <div class="card"><div class="cl">Sector Multiplier</div><div class="cv">×{res['sector_multiplier']:.2f}</div><div class="cd">{sec}</div></div>
+  <div class="card"><div class="cl">Volatility Multiplier</div><div class="cv">×{res['volatility_multiplier']:.4f}</div><div class="cd">{'2024 VIX avg' if pub else 'Private company (×1.0)'}</div></div>
+</div>
+<h2>Revenue by Country</h2>
+<table><tr><th>Country</th><th>Share</th></tr>{rev_rows}</table>
+<h2>Supplier Domiciles</h2>
+<table><tr><th>Country</th><th>Share</th></tr>{sup_rows}</table>
+<h2>Supplier Facility Domiciles</h2>
+<table><tr><th>Country</th><th>Share</th></tr>{fac_rows}</table>
+<h2>Supply Chain Detail</h2>
+<table>
+<tr><td>Suppliers component</td><td style='text-align:right'>{res['sc_sup_component']:.4f}</td></tr>
+<tr><td>Supplier-facilities component</td><td style='text-align:right'>{res['sc_fac_component']:.4f}</td></tr>
+<tr><td>Intermediate (0.5×A + 0.5×B)</td><td style='text-align:right'>{res['sc_intermediate']:.4f}</td></tr>
+<tr><td>HHI combined</td><td style='text-align:right'>{res['sc_hhi_combined']:.4f}</td></tr>
+<tr><td>HHI submultiplier</td><td style='text-align:right'>×{res['sc_hhi_sub']:.2f}</td></tr>
+<tr style='font-weight:700;background:#fdf2ee'><td>Supply Chain Exposure</td><td style='text-align:right'>{res['supply_chain']:.4f}</td></tr>
+</table>
+<div class="footer">&copy; 2026 Data Group 1 — CGRI Project &nbsp;|&nbsp;
+Open this file in a browser and use <b>File → Print → Save as PDF</b> to export as PDF.</div>
+</body></html>"""
+
+        html_report = _build_html_report(result, summary, cat, col, net_debt_ebitda, sector, is_public)
+
+        e1, e2, e3 = st.columns(3)
         e1.download_button(
             "⬇ CSV (summary)",
             data=pd.DataFrame([summary]).to_csv(index=False).encode(),
@@ -1055,6 +1148,13 @@ elif page == "🧮 Custom Calculator":
             file_name=f"{company_name.replace(' ','_')}_cgri.json",
             mime="application/json",
         )
+        e3.download_button(
+            "📄 PDF Report (HTML)",
+            data=html_report.encode("utf-8"),
+            file_name=f"{company_name.replace(' ','_')}_cgri_report.html",
+            mime="text/html",
+            help="Download as HTML then open in browser → File → Print → Save as PDF",
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1064,6 +1164,37 @@ elif page == "🧮 Custom Calculator":
 elif page == "ℹ Methodology":
 
     st.markdown("## Methodology & Data Sources")
+    st.markdown(
+        "_The CGRI quantifies any company's exposure to geopolitical risk across its headquarters, "
+        "revenue geography, and supply chain footprint. Read the framework below, then head to the "
+        "**Custom Calculator** to score your own company._"
+    )
+
+    st.markdown("""
+<div style="background:linear-gradient(135deg,#E8601A,#b83f0d);border-radius:12px;padding:22px 26px;color:#fff;margin-bottom:8px">
+<h3 style="margin:0 0 8px;color:#fff">👋 First time here? Here's how to use this tool</h3>
+<p style="margin:0 0 14px;font-size:0.9rem;opacity:0.93">
+The CGRI Tool has three sections. We recommend following this order:</p>
+<table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+<tr>
+<td style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;width:33%">
+<b>Step 1 — Methodology (here)</b><br>
+<span style="opacity:0.88">Understand the scoring formula, component weights, and data sources before computing any score.</span>
+</td>
+<td style="width:4%"></td>
+<td style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;width:33%">
+<b>Step 2 — Custom Calculator</b><br>
+<span style="opacity:0.88">Enter your company's profile, revenue geography, and supply chain data to get a custom CGRI score with full visual breakdown.</span>
+</td>
+<td style="width:4%"></td>
+<td style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;width:26%">
+<b>Step 3 — Benchmark Dashboard</b><br>
+<span style="opacity:0.88">Compare your score (or any score) against 48 global companies across sectors.</span>
+</td>
+</tr>
+</table>
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown(r"""
 ### CGRI Formula (2024)

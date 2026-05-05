@@ -174,6 +174,29 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .alert-warn{background:#fff3cd;border:1px solid #ffc107;color:#856404}
 .alert-err{background:#f8d7da;border:1px solid #f5c6cb;color:#721c24}
 
+/* ── Hero ── */
+.cgri-hero{padding:18px 24px 14px;background:#fff;border-bottom:1px solid #ece6df}
+.cgri-hero-title{font-size:1.35rem;font-weight:800;color:#1a1a1a;margin-bottom:6px}
+.cgri-hero-desc{font-size:0.83rem;color:#555;line-height:1.65;max-width:860px}
+.cgri-hero-desc strong{color:#E8601A}
+
+/* ── Welcome banner ── */
+.welcome-banner{background:linear-gradient(135deg,#E8601A 0%,#b83f0d 100%);border-radius:12px;padding:22px 26px;color:#fff;margin-bottom:22px}
+.welcome-banner h2{font-size:1.2rem;font-weight:800;margin-bottom:7px}
+.welcome-banner p{font-size:0.85rem;opacity:0.92;line-height:1.65;max-width:700px}
+.welcome-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.welcome-step{background:rgba(255,255,255,0.15);border-radius:9px;padding:13px 15px}
+.welcome-step-num{font-size:0.65rem;font-weight:700;opacity:0.7;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.welcome-step-title{font-size:0.88rem;font-weight:700}
+.welcome-step-desc{font-size:0.76rem;opacity:0.88;margin-top:4px;line-height:1.5}
+.welcome-step-btn{display:inline-block;margin-top:9px;padding:4px 12px;background:rgba(255,255,255,0.25);border-radius:20px;font-size:0.76rem;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.4);color:#fff;transition:background .15s}
+.welcome-step-btn:hover{background:rgba(255,255,255,0.4)}
+
+/* ── Panel description ── */
+.panel-desc{font-size:0.77rem;color:#555;line-height:1.6;padding:8px 10px 8px 12px;background:#fff8f5;border-left:3px solid #E8601A55;border-radius:0 6px 6px 0;margin-bottom:10px}
+.panel-desc b{color:#333}
+.panel-desc i{color:#888}
+
 /* ── Responsive ── */
 @media(max-width:768px){
   .kpi-row{grid-template-columns:1fr 1fr}
@@ -202,15 +225,21 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 <body>
 <div id="cgri-widget">
 
-  <!-- Tab bar -->
+  <!-- Hero description -->
+  <div class="cgri-hero">
+    <div class="cgri-hero-title">Company Geopolitical Risk Index</div>
+    <p class="cgri-hero-desc">The CGRI quantifies any company's exposure to geopolitical risk across its headquarters, revenue geography, and supply chain footprint. <strong>New here? Start with the Methodology tab</strong> to understand the scoring framework, then use the <strong>Custom Calculator</strong> to score your own company, or explore the <strong>Benchmark Dashboard</strong> to compare 48 global firms.</p>
+  </div>
+
+  <!-- Tab bar (Methodology → Custom Calculator → Benchmark Dashboard) -->
   <div class="cgri-tabs">
-    <button class="cgri-tab active" onclick="showTab('dashboard')">📊 Benchmark Dashboard</button>
+    <button class="cgri-tab active" onclick="showTab('methodology')">ℹ️ Methodology</button>
     <button class="cgri-tab" onclick="showTab('calculator')">🧮 Custom Calculator</button>
-    <button class="cgri-tab" onclick="showTab('methodology')">ℹ Methodology</button>
+    <button class="cgri-tab" onclick="showTab('dashboard')">📊 Benchmark Dashboard</button>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
-  <div id="tab-dashboard" class="cgri-page active">
+  <div id="tab-dashboard" class="cgri-page">
 
     <div class="kpi-row" id="kpi-row"></div>
 
@@ -282,6 +311,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 
     <div class="calc-section">
       <h3>Step 1 — Company Profile</h3>
+      <p style="font-size:0.82rem;color:#666;margin-bottom:14px">Fill in your company's basic profile. These fields determine the HQ risk score, sector multiplier, and financial leverage multiplier applied to your final CGRI score.</p>
       <div class="profile-grid">
         <div class="form-group">
           <label>Company Name</label>
@@ -315,22 +345,31 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 
     <div class="calc-section">
       <h3>Step 2 — Geographic Exposure</h3>
-      <p style="font-size:0.82rem;color:#666;margin-bottom:16px">Enter any unit (%, USD mn, count). Weights are auto-normalised to 100%. Rows with zero or blank country are ignored.</p>
+      <p style="font-size:0.82rem;color:#666;margin-bottom:16px">Enter any unit (%, USD mn, count, etc.) — weights are <b>auto-normalised to 100%</b>. Rows with a blank country or zero weight are ignored. All three panels are required.</p>
       <div class="exposure-grid">
         <div class="exp-panel">
           <div class="exp-panel-head"><span class="exp-panel-num">1</span>Revenue by Country</div>
+          <div class="panel-desc">
+            Where does your company earn its revenues? Enter the percentage of annual sales (or USD amounts) generated in each country. <b>Example:</b> 60% Germany, 40% Japan → enter 60 and 40. This captures how much a geopolitical disruption in each market could affect your top line.
+          </div>
           <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
           <div id="rev-rows" class="exp-rows"></div>
           <button class="btn-add" onclick="addRow('rev')">+ Add country</button>
         </div>
         <div class="exp-panel">
           <div class="exp-panel-head"><span class="exp-panel-num">2</span>Supplier Domiciles</div>
+          <div class="panel-desc">
+            <b>Where are your suppliers legally registered (corporate HQ)?</b> Enter the number of suppliers or % of spend by their home country. This reflects <i>corporate domicile risk</i> — sanctions, trade policy changes, or political instability in a supplier's home country can freeze contracts or disrupt procurement. <i>Note: this is the supplier's official country, not where they manufacture.</i>
+          </div>
           <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
           <div id="sup-rows" class="exp-rows"></div>
           <button class="btn-add" onclick="addRow('sup')">+ Add country</button>
         </div>
         <div class="exp-panel">
           <div class="exp-panel-head"><span class="exp-panel-num">3</span>Supplier Facility Domiciles</div>
+          <div class="panel-desc">
+            <b>Where do your suppliers actually produce or operate?</b> Enter facility count or % weight by physical location. A supplier headquartered in Germany may manufacture in Vietnam — the factory country is what drives <i>operational disruption risk</i> (shutdowns, port closures, labour unrest). <i>This often differs significantly from supplier domiciles above — both inputs matter.</i>
+          </div>
           <div class="exp-col-labels"><span>Country</span><span>Weight</span><span>Share</span><span>GRI</span><span></span></div>
           <div id="supfac-rows" class="exp-rows"></div>
           <button class="btn-add" onclick="addRow('supfac')">+ Add country</button>
@@ -376,7 +415,32 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
   </div>
 
   <!-- ═══════════════════════════════════════════════════════ METHODOLOGY -->
-  <div id="tab-methodology" class="cgri-page">
+  <div id="tab-methodology" class="cgri-page active">
+
+    <!-- Welcome banner for first-time users -->
+    <div class="welcome-banner">
+      <h2>👋 Welcome to the CGRI Tool</h2>
+      <p>This tool helps you understand and compute the <b>Company Geopolitical Risk Index</b> — a composite score that quantifies how exposed any company is to geopolitical disruptions, based on its headquarters location, revenue geography, and supply chain footprint. Follow the three steps below to get started.</p>
+      <div class="welcome-steps">
+        <div class="welcome-step">
+          <div class="welcome-step-num">Step 1 — You are here</div>
+          <div class="welcome-step-title">📖 Understand the Methodology</div>
+          <div class="welcome-step-desc">Read the scoring formula, component weights, multipliers, and data sources below. Understanding the methodology helps you interpret any CGRI score correctly.</div>
+        </div>
+        <div class="welcome-step">
+          <div class="welcome-step-num">Step 2</div>
+          <div class="welcome-step-title">🧮 Calculate Your Own Score</div>
+          <div class="welcome-step-desc">Enter your company's HQ country, sector, financial leverage, revenue geography, and supply chain data to compute a custom CGRI score with full breakdown.</div>
+          <button class="welcome-step-btn" onclick="showTab('calculator')">Go to Calculator →</button>
+        </div>
+        <div class="welcome-step">
+          <div class="welcome-step-num">Step 3</div>
+          <div class="welcome-step-title">📊 Compare with 48 Benchmarks</div>
+          <div class="welcome-step-desc">Explore how your score compares against a portfolio of 48 global companies (2024 data), filterable by risk category and sector.</div>
+          <button class="welcome-step-btn" onclick="showTab('dashboard')">View Dashboard →</button>
+        </div>
+      </div>
+    </div>
 
     <div class="method-intro">
       The <b>Company Geopolitical Risk Index (CGRI)</b> quantifies a firm's exposure to geopolitical risk across its headquarters location, revenue geography, and supply chain footprint. Three core components are combined with sector, volatility, and financial leverage adjustments.
@@ -511,7 +575,7 @@ function showTab(id){
   document.querySelectorAll('.cgri-page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.cgri-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  const idx={dashboard:0,calculator:1,methodology:2}[id];
+  const idx={methodology:0,calculator:1,dashboard:2}[id];
   document.querySelectorAll('.cgri-tab')[idx].classList.add('active');
 }
 
@@ -877,8 +941,41 @@ function renderExport(){
           '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt"/></svg>'+
           'JSON (full detail)'+
         '</button>'+
+        '<button class="btn-export" id="pdf-export-btn" onclick="exportPDF(this)" style="border-color:#E8601A;color:#E8601A">'+
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="7.5" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="10" x2="7" y2="10" stroke="currentColor" stroke-width="1.2"/></svg>'+
+          'PDF Report'+
+        '</button>'+
       '</div>'+
     '</div>';
+}
+
+async function exportPDF(btn){
+  if(!calcResult)return;
+  const orig=btn.innerHTML;
+  btn.innerHTML='⏳ Generating PDF...';
+  btn.disabled=true;
+  try{
+    if(typeof html2canvas==='undefined'||typeof window.jspdf==='undefined'){
+      alert('PDF libraries still loading — please try again in a moment.');
+      btn.innerHTML=orig;btn.disabled=false;return;
+    }
+    const el=document.getElementById('calc-results');
+    const canvas=await html2canvas(el,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#f5f5f5',logging:false});
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pw=pdf.internal.pageSize.getWidth();
+    const ph=pdf.internal.pageSize.getHeight();
+    const iw=pw, ih=canvas.height*pw/canvas.width;
+    const img=canvas.toDataURL('image/png');
+    let pos=0,left=ih;
+    pdf.addImage(img,'PNG',0,pos,iw,ih);
+    left-=ph;
+    while(left>0){pos-=ph;pdf.addPage();pdf.addImage(img,'PNG',0,pos,iw,ih);left-=ph;}
+    pdf.save(calcResult.name.replace(/\s+/g,'_')+'_CGRI_Report.pdf');
+  }catch(e){
+    alert('PDF export failed: '+e.message);
+  }
+  btn.innerHTML=orig;btn.disabled=false;
 }
 
 function exportCSV(){
@@ -1047,13 +1144,21 @@ function _cgriInit(){
 }
 
 (function(){
+  function loadScript(src,cb){
+    const s=document.createElement('script');s.src=src;s.onload=cb;document.head.appendChild(s);
+  }
+  function loadPDFLibs(cb){
+    // load html2canvas then jsPDF for PDF export
+    if(typeof html2canvas!=='undefined'&&typeof window.jspdf!=='undefined'){cb();return;}
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',function(){
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',cb);
+    });
+  }
+  function boot(){loadPDFLibs(_cgriInit);}
   if(typeof Chart!=='undefined'){
-    _cgriInit();
+    boot();
   } else {
-    const s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-    s.onload=_cgriInit;
-    document.head.appendChild(s);
+    loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',boot);
   }
 })();
 </script>
