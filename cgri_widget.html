@@ -957,23 +957,116 @@ async function exportPDF(btn){
       alert('PDF libraries still loading — please try again in a moment.');
       btn.innerHTML=orig;btn.disabled=false;return;
     }
-    const el=document.getElementById('calc-results');
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#f5f5f5',logging:false});
+    const r=calcResult;
+    const clr={Low:'#27ae60',Moderate:'#e8a020',High:'#e67e22','Very High':'#e74c3c'}[r.rl]||'#e67e22';
+    const sec=r.sector.length>30?r.sector.substring(0,30)+'…':r.sector;
+    const dateStr=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+    // Snapshot charts as PNG from live canvases
+    const radarImg=document.getElementById('calcRadar').toDataURL('image/png');
+    const barImg=document.getElementById('calcBar').toDataURL('image/png');
+    // Clone the gauge SVG block
+    const gaugeClone=document.getElementById('score-box').cloneNode(true);
+    gaugeClone.style.cssText='display:block;text-align:center';
+
+    // ── Build clean off-screen print div ──────────────────────────────────
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-9999px;top:0;width:794px;background:#fff;'+
+      'font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;padding:40px 44px;box-sizing:border-box';
+
+    wrap.innerHTML=
+      // Header
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;'+
+        'border-bottom:3px solid #E8601A;padding-bottom:16px;margin-bottom:26px">'+
+        '<div>'+
+          '<div style="font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;'+
+            'color:#E8601A;margin-bottom:5px">Company Geopolitical Risk Index &middot; 2024</div>'+
+          '<div style="font-size:1.55rem;font-weight:800;color:#1a1a1a;line-height:1.1">'+r.name+'</div>'+
+          '<div style="font-size:0.74rem;color:#888;margin-top:5px">'+r.hqC+' &nbsp;&middot;&nbsp; '+sec+'</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:0.6rem;color:#aaa;font-weight:700;text-transform:uppercase;'+
+            'letter-spacing:0.07em;margin-bottom:4px">Final CGRI Score</div>'+
+          '<div style="font-size:3rem;font-weight:800;color:'+clr+';line-height:1">'+r.cgri.toFixed(2)+'</div>'+
+          '<div style="display:inline-block;margin-top:6px;padding:4px 14px;background:'+clr+';'+
+            'color:#fff;border-radius:20px;font-size:0.72rem;font-weight:700">'+r.rl+' Risk</div>'+
+        '</div>'+
+      '</div>'+
+      // Gauge + component cards
+      '<div style="display:flex;gap:22px;align-items:flex-start;margin-bottom:26px">'+
+        '<div id="_pdf_gauge" style="flex:0 0 240px;background:#f7f7f7;border-radius:10px;'+
+          'padding:14px 10px;text-align:center"></div>'+
+        '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+
+          _pdfCard('HQ Risk',r.hqRisk.toFixed(2),r.hqC,'#E8601A')+
+          _pdfCard('Revenue Exp.',r.revComp.toFixed(2),'HHI sub \xd7'+r.hhiSubRev.toFixed(2),'#E8601A')+
+          _pdfCard('Supply Chain',r.scComp.toFixed(2),'HHI sub \xd7'+r.hhiSubSC.toFixed(2),'#E8601A')+
+          _pdfCard('Fin. Leverage','\xd7'+r.fm.toFixed(1),'D/EBITDA '+r.leverage.toFixed(1),'#4b6fff')+
+          _pdfCard('Sector Mult.','\xd7'+r.sm.toFixed(2),sec,'#4b6fff')+
+          _pdfCard('Volatility','\xd7'+r.vm.toFixed(4),r.isPublic?'VIX 2024 avg':'Private \xd71.0','#4b6fff',!r.isPublic)+
+        '</div>'+
+      '</div>'+
+      // Charts
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:26px">'+
+        '<div style="background:#f7f7f7;border-radius:10px;padding:16px">'+
+          '<div style="font-size:0.7rem;font-weight:700;color:#1a1a1a;margin-bottom:10px;'+
+            'padding-bottom:6px;border-bottom:2px solid #E8601A;display:inline-block">'+
+            'Risk Profile vs Benchmark Average</div>'+
+          '<img src="'+radarImg+'" style="width:100%;height:auto;display:block"/>'+
+        '</div>'+
+        '<div style="background:#f7f7f7;border-radius:10px;padding:16px">'+
+          '<div style="font-size:0.7rem;font-weight:700;color:#1a1a1a;margin-bottom:10px;'+
+            'padding-bottom:6px;border-bottom:2px solid #E8601A;display:inline-block">'+
+            'Ranking vs Benchmark Portfolio</div>'+
+          '<img src="'+barImg+'" style="width:100%;height:auto;display:block"/>'+
+        '</div>'+
+      '</div>'+
+      // Footer
+      '<div style="border-top:1px solid #eee;padding-top:10px;font-size:0.6rem;color:#bbb;'+
+        'display:flex;justify-content:space-between">'+
+        '<span>&copy; 2026 Data Group 1 &mdash; CGRI Project &middot; geopriskindex.com</span>'+
+        '<span>Generated '+dateStr+'</span>'+
+      '</div>';
+
+    // Inject gauge clone into its slot
+    wrap.querySelector('#_pdf_gauge').appendChild(gaugeClone);
+    document.body.appendChild(wrap);
+    await new Promise(res=>setTimeout(res,400));
+
+    const canvas=await html2canvas(wrap,{
+      scale:2,useCORS:true,allowTaint:true,
+      backgroundColor:'#ffffff',logging:false,
+      width:794,windowWidth:794
+    });
+    document.body.removeChild(wrap);
+
     const{jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const pw=pdf.internal.pageSize.getWidth();
     const ph=pdf.internal.pageSize.getHeight();
-    const iw=pw, ih=canvas.height*pw/canvas.width;
+    const iw=pw,ih=canvas.height*pw/canvas.width;
     const img=canvas.toDataURL('image/png');
     let pos=0,left=ih;
     pdf.addImage(img,'PNG',0,pos,iw,ih);
     left-=ph;
     while(left>0){pos-=ph;pdf.addPage();pdf.addImage(img,'PNG',0,pos,iw,ih);left-=ph;}
-    pdf.save(calcResult.name.replace(/\s+/g,'_')+'_CGRI_Report.pdf');
+    pdf.save(r.name.replace(/\s+/g,'_')+'_CGRI_Report.pdf');
+
   }catch(e){
     alert('PDF export failed: '+e.message);
+    console.error(e);
   }
   btn.innerHTML=orig;btn.disabled=false;
+}
+
+function _pdfCard(label,value,detail,accent,faded){
+  return '<div style="background:#fff;border-radius:8px;padding:10px 8px;text-align:center;'+
+    'border-top:3px solid '+accent+';box-shadow:0 1px 3px rgba(0,0,0,0.06);'+
+    (faded?'opacity:0.5':'')+' ">'+
+    '<div style="font-size:0.55rem;color:#888;font-weight:700;text-transform:uppercase;'+
+      'letter-spacing:0.05em;margin-bottom:3px">'+label+'</div>'+
+    '<div style="font-size:1.15rem;font-weight:700;color:#1a1a1a;line-height:1.1">'+value+'</div>'+
+    '<div style="font-size:0.58rem;color:#aaa;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+detail+'</div>'+
+  '</div>';
 }
 
 function exportCSV(){
