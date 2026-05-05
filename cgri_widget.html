@@ -139,6 +139,22 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
 .btn-export:hover{border-color:#E8601A;color:#E8601A;background:#fffaf8}
 .btn-export svg{flex-shrink:0}
 
+/* ── Email Gate Modal ── */
+#cgri-email-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+#cgri-email-modal.open{display:flex}
+.cgri-modal-box{background:#fff;border-radius:14px;padding:36px 32px;max-width:420px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,0.18);text-align:center;position:relative}
+.cgri-modal-box h3{font-size:1.15rem;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.cgri-modal-box p{font-size:0.84rem;color:#666;line-height:1.6;margin-bottom:22px}
+.cgri-modal-box input{width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:0.9rem;outline:none;margin-bottom:14px;transition:border-color .15s}
+.cgri-modal-box input:focus{border-color:#E8601A}
+.cgri-modal-btn{width:100%;padding:12px;background:#E8601A;color:#fff;border:none;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:background .15s}
+.cgri-modal-btn:hover{background:#c9501a}
+.cgri-modal-btn:disabled{background:#ccc;cursor:default}
+.cgri-modal-skip{display:block;margin-top:12px;font-size:0.78rem;color:#aaa;cursor:pointer;text-decoration:underline}
+.cgri-modal-skip:hover{color:#666}
+.cgri-modal-close{position:absolute;top:12px;right:16px;font-size:1.3rem;color:#bbb;cursor:pointer;line-height:1}
+.cgri-modal-close:hover{color:#666}
+
 /* ── Methodology ── */
 .method-intro{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:20px;font-size:0.85rem;color:#555;line-height:1.7;border-left:4px solid #E8601A}
 .method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -939,7 +955,7 @@ function renderExport(){
           '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt"/></svg>'+
           'JSON (full detail)'+
         '</button>'+
-        '<button class="btn-export" id="pdf-export-btn" onclick="exportPDF(this)" style="border-color:#E8601A;color:#E8601A">'+
+        '<button class="btn-export" id="pdf-export-btn" onclick="showEmailGate(this)" style="border-color:#E8601A;color:#E8601A">'+
           '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="7.5" x2="10" y2="7.5" stroke="currentColor" stroke-width="1.2"/><line x1="4" y1="10" x2="7" y2="10" stroke="currentColor" stroke-width="1.2"/></svg>'+
           'PDF Report'+
         '</button>'+
@@ -1245,6 +1261,74 @@ function _cgriInit(){
       loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',cb);
     });
   }
+  // ── Email gate ──────────────────────────────────────────────
+  // Paste your deployed Google Apps Script Web App URL here:
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+  let _pdfBtn = null;
+
+  window.showEmailGate = function(btn){
+    if(!calcResult) return;
+    _pdfBtn = btn;
+    document.getElementById('cgri-email-input').value = '';
+    document.getElementById('cgri-modal-submit').disabled = false;
+    document.getElementById('cgri-modal-submit').textContent = 'Download Report';
+    document.getElementById('cgri-email-modal').classList.add('open');
+    setTimeout(()=>document.getElementById('cgri-email-input').focus(), 100);
+  };
+
+  window.cgriModalClose = function(){
+    document.getElementById('cgri-email-modal').classList.remove('open');
+    _pdfBtn = null;
+  };
+
+  window.cgriModalSkip = function(){
+    document.getElementById('cgri-email-modal').classList.remove('open');
+    if(_pdfBtn) exportPDF(_pdfBtn);
+    _pdfBtn = null;
+  };
+
+  window.cgriModalSubmit = function(){
+    const emailEl = document.getElementById('cgri-email-input');
+    const submitBtn = document.getElementById('cgri-modal-submit');
+    const email = emailEl.value.trim();
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      emailEl.style.borderColor = '#e74c3c';
+      emailEl.focus();
+      return;
+    }
+    emailEl.style.borderColor = '#ddd';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    const payload = {
+      email: email,
+      company: calcResult ? calcResult.name : '',
+      score: calcResult ? calcResult.cgri : '',
+      riskLevel: calcResult ? calcResult.rl : '',
+      timestamp: new Date().toISOString()
+    };
+
+    // POST to Google Apps Script; fire-and-forget (no-cors)
+    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE'){
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      }).catch(()=>{}); // silent fail — don't block PDF
+    }
+
+    document.getElementById('cgri-email-modal').classList.remove('open');
+    if(_pdfBtn) exportPDF(_pdfBtn);
+    _pdfBtn = null;
+  };
+
+  // Close modal on backdrop click
+  document.getElementById('cgri-email-modal').addEventListener('click', function(e){
+    if(e.target === this) cgriModalClose();
+  });
+
   function boot(){loadPDFLibs(_cgriInit);}
   if(typeof Chart!=='undefined'){
     boot();
@@ -1253,5 +1337,18 @@ function _cgriInit(){
   }
 })();
 </script>
+
+<!-- Email Gate Modal -->
+<div id="cgri-email-modal" role="dialog" aria-modal="true" aria-labelledby="cgri-modal-title">
+  <div class="cgri-modal-box">
+    <span class="cgri-modal-close" onclick="cgriModalClose()" aria-label="Close">&times;</span>
+    <div style="font-size:2rem;margin-bottom:10px">📄</div>
+    <h3 id="cgri-modal-title">Get Your PDF Report</h3>
+    <p>Enter your email to download the report. We'll only use it to occasionally share updates on the CGRI tool.</p>
+    <input type="email" id="cgri-email-input" placeholder="your@email.com" autocomplete="email"/>
+    <button class="cgri-modal-btn" id="cgri-modal-submit" onclick="cgriModalSubmit()">Download Report</button>
+    <span class="cgri-modal-skip" onclick="cgriModalSkip()">Skip and download without submitting</span>
+  </div>
+</div>
 </body>
 </html>
