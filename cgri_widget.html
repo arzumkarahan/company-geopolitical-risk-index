@@ -277,26 +277,25 @@ tbody td{padding:9px 12px;border-bottom:1px solid #eee;white-space:nowrap}
       <canvas id="barChart"></canvas>
     </div>
 
-    <div class="two-col">
-      <div class="chart-box">
-        <div class="section-title">Risk Dimension Radar</div>
-        <div class="radar-controls">
-          <label>Companies:</label>
-          <select id="radar-select" multiple size="4" style="height:80px;min-width:180px" onchange="updateRadar()"></select>
-        </div>
-        <div class="radar-toggle-row">
-          <label class="tog-switch">
-            <input type="checkbox" id="radar-expanded" onchange="updateRadar()"/>
-            <span class="tog-slider"></span>
-          </label>
-          <span class="tog-label">Expanded view (+ Financial &amp; Sector multipliers)</span>
-        </div>
-        <canvas id="radarChart"></canvas>
+    <div class="chart-box">
+      <div class="section-title">Risk Dimension Radar</div>
+      <div class="radar-controls">
+        <label>Companies:</label>
+        <select id="radar-select" multiple size="4" style="height:80px;min-width:180px" onchange="updateRadar()"></select>
       </div>
-      <div class="chart-box">
-        <div class="section-title">Weighted Component Breakdown</div>
-        <canvas id="stackChart"></canvas>
+      <div class="radar-toggle-row">
+        <label class="tog-switch">
+          <input type="checkbox" id="radar-expanded" onchange="updateRadar()"/>
+          <span class="tog-slider"></span>
+        </label>
+        <span class="tog-label">Expanded view (+ Financial &amp; Sector multipliers)</span>
       </div>
+      <canvas id="radarChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <div class="section-title">Weighted Component Breakdown</div>
+      <canvas id="stackChart" style="max-height:420px"></canvas>
     </div>
 
     <div class="section-title">Full Data Table</div>
